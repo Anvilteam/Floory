@@ -1,0 +1,12 @@
+{"uStatistics": "Статистика пользователя {member}",
+ "sStatistics": "Статистика сервера {guild}",
+ "real_name": "Настоящий ник:",
+ "uCreated_at": "Создал аккаунт:",
+ "joined_at": "Присоединился к серверу:",
+ "top_role": "Самая высокая роль:",
+ "is_owner": "Владелец сервера?",
+ "members_amount": "Кол-во участников:",
+ "chanCateg_amount": "Кол-во каналов/категорий:",
+ "sCreated_at": "Сервер создан:",
+ "members_permissions": "Права участника {member}",
+ "perms_list": "Список прав"}
