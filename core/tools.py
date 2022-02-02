@@ -48,7 +48,7 @@ def is_bot_developer():
     def predicate(inter):
         # Список id разработчиков бота
         developers = [551439984255696908]
-        if inter.author.id in developers:
+        if inter.author.id not in developers:
             raise NotBotDeveloper
         return True
     return commands.check(predicate)
