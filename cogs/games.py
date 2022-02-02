@@ -5,16 +5,15 @@ from disnake.ext import commands
 from core.tools import LangTool
 
 
-class Games(commands.Cog):
+class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
 
     @commands.slash_command()
-    async def test(self, inter):
-        print("subcmd test")
+    async def fun(self, inter):
+        pass
 
-
-    @test.sub_command(description="тест")
+    @fun.sub_command()
     @commands.cooldown(1, 25)
     async def coin(self, inter: disnake.ApplicationCommandInteraction):
         lang = LangTool(inter.guild.id)
@@ -30,4 +29,4 @@ class Games(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Games(client))
+    client.add_cog(Fun(client))

@@ -1,3 +1,5 @@
 {"error": "Произошла ошибка!",
-"true":  "Да",
-"false":  "Нет"}
+ "true":  "Да",
+ "false":  "Нет",
+ "inviting_title": "Спасибо за приглашение Floory",
+ "inviting_description": "Список команд доступен через /help"}

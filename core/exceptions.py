@@ -13,3 +13,8 @@ class NotEnoughPerms(disnake.ext.commands.CommandInvokeError):
 class MemberHigherPermissions(disnake.ext.commands.CommandInvokeError):
     def __str__(self):
         return 'Member has higher permissions'
+
+
+class NotBotDeveloper(commands.CommandError):
+    def __str__(self):
+        return 'Member is not a developer of FlooryBot'

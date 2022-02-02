@@ -1,28 +1,29 @@
 import pymysql.cursors
 import yaml
-
+import redis
 
 cfg = yaml.safe_load(open('config.yaml', 'r'))
 
-# Connect to the database
+# Подключение к базе данных
 connection = pymysql.connect(host=cfg["mysql"]["host"],
                              user=cfg["mysql"]["user"],
                              password=cfg["mysql"]["password"],
-                             database=cfg["mysql"]["database"],
-                             cursorclass=pymysql.cursors.DictCursor)
+                             database=cfg["mysql"]["database"])
+
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 
-async def cur(_type, arg):
+def cur(_type, arg):
     connection.autocommit(True)
     with connection.cursor() as cursor:
         match _type:
             case "query":
                 cursor.execute(arg)
             case "fetch":
-                await cursor.execute(arg)
-                result = await cursor.fetchone()
-                return f"{str(result)[2:-3]}"
+                cursor.execute(arg)
+                result = cursor.fetchone()
+                return result
             case "fetchall":
-                await cursor.execute(arg)
-                result = await cursor.fetchall()
-                return f"{result}"
+                cursor.execute(arg)
+                result = cursor.fetchall()
+                return result

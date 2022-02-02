@@ -2,4 +2,6 @@
  "kick": "{author} выгнал {member} по причине: {reason}",
  "ban": "{author} забанил {member} по причине: {reason}",
  "unban": "{author} разбанил {member} по причине: {reason}",
- "clear": "Чат был успешно очищен на {amount} сообщений/ие"}
+ "clear": "Чат был успешно очищен на {amount} сообщений/ие",
+ "mute": "{author} замьютил {member} по причине: {reason}",
+ "unmute": "{author} размьютил {member}"}

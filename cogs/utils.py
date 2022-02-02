@@ -1,15 +1,18 @@
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import Param
-from core.config import cCodes, EMOJI_ASSOCIATION
-from core.tools import LangTool, permsToDict, perms_check
+from core.tools import LangTool, modify_permissions, has_permissions
 
 
 class Utils(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.slash_command(description="get user info")
+    @commands.slash_command()
+    async def utils(self, inter):
+        pass
+
+    @utils.sub_command(description="get user info")
     async def member(self, inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
         lang = LangTool(inter.guild.id)
         guild_owner = inter.guild.owner
@@ -33,9 +36,9 @@ class Utils(commands.Cog):
                         value=top_role)
         embed.add_field(name="👑 " + lang.get_frase("utils.is_owner"),
                         value=is_owner, inline=False)
-        await inter.response.send_message(embed=embed)
+        await inter.send(embed=embed, delete_after=30.0)
 
-    @commands.slash_command(description="get server info")
+    @utils.sub_command(description="get server info")
     async def server(self, inter: disnake.ApplicationCommandInteraction):
         lang = LangTool(inter.guild.id)
         guild = inter.guild
@@ -59,14 +62,14 @@ class Utils(commands.Cog):
             embed.set_thumbnail(file=disnake.File("logo.png"))
         else:
             embed.set_thumbnail(url=str(icon))
-        await inter.response.send_message(embed=embed)
+        await inter.send(embed=embed, delete_after=30.0)
 
-    @perms_check(["manage_roles"])
-    @commands.slash_command()
+    @has_permissions(["manage_roles"])
+    @utils.sub_command()
     async def permissions(self, inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
-        emojies = EMOJI_ASSOCIATION
+        emojies = {0: '❌', 1: '✅'}
         lang = LangTool(inter.guild.id)
-        member_perms = permsToDict(member.guild_permissions)
+        member_perms = modify_permissions(member.guild_permissions)
         # '❌|✅', 'permission translate', 'new line'
         embed_value = "".join(
             [f"{emojies[member_perms[perm]]} {lang.get_frase(f'permissions.{perm}')}\n" for perm in member_perms])
@@ -74,11 +77,15 @@ class Utils(commands.Cog):
                               color=0x3ef0a9)
         embed.add_field(name=lang.get_frase("utils.perms_list"), value=embed_value)
         await inter.send(embed=embed, delete_after=30.0)
-        print("успешно")
 
-    @commands.slash_command()
-    async def fetch_user(self, inter: disnake.ApplicationCommandInteraction, member):
-        user = await self.client.fetch
+    @utils.sub_command()
+    async def avatar(self, inter: disnake.ApplicationCommandInteraction,
+                     member: disnake.Member):
+        embed = disnake.Embed(title=member)
+        embed.set_image(url=member.display_avatar.url)
+        await inter.response.send_message(embed=embed)
+
+
 
 
 def setup(client):
