@@ -1,5 +1,5 @@
-disnake>=2.3.0
-PyMySQL>=0.9.3
-PyYAML>=6.0
-redis>=4.1.2
-progress>=1.6
+disnake==2.3.0
+PyMySQL==0.9.3
+PyYAML==6.0
+redis==4.1.2
+progress==1.6
