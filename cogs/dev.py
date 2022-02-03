@@ -12,21 +12,16 @@ class Dev(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    @is_bot_developer()
     @commands.slash_command()
     async def dev(self, inter):
         pass
-
-    # Заглушка для ошибок потому что сингл-хендлеры не чистят ошибки в консоли
-    @commands.Cog.listener()
-    async def on_slash_command_error(self, inter, error):
-        logger.error(error)
 
     @dev.error
     async def dev_error(self, inter, error):
         if isinstance(error, NotBotDeveloper):
             await inter.send("You are not bot developer")
 
-    @is_bot_developer()
     @dev.sub_command()
     async def make_news(self, inter, title, descr, field_title=None, field_value=None, footer=None, image=None):
         embed = disnake.Embed(title=title, description=descr)

@@ -19,13 +19,13 @@ class Fun(commands.Cog):
         lang = LangTool(inter.guild.id)
         variants = ['орел', 'решка']
         coin_choice = random.choice(variants)
-        await inter.response.send_message(lang.get_frase("games.toss"))
+        await inter.response.send_message(lang["games.toss"])
         time.sleep(1.5)
         match coin_choice:
             case "орел":
-                await inter.edit_original_message(content=lang.get_frase("games.eagleWin"))
+                await inter.edit_original_message(content=lang["games.eagleWin"])
             case _:
-                await inter.edit_original_message(content=lang.get_frase("games.tailWin"))
+                await inter.edit_original_message(content=lang["games.tailWin"])
 
 
 def setup(client):

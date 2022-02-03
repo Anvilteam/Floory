@@ -1,5 +1,7 @@
-{"error": "Произошла ошибка!",
+{"guild": "Сервер",
+ "error": "Произошла ошибка!",
  "true":  "Да",
  "false":  "Нет",
+ "second": "сек.",
  "inviting_title": "Спасибо за приглашение Floory",
  "inviting_description": "Список команд доступен через /help"}

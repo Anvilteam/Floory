@@ -19,53 +19,45 @@ class Moderation(commands.Cog):
         if isinstance(error, NotEnoughPerms):
             lang = LangTool(inter.guild.id)
             permissions = error.permissions
-            embed_value = "".join([f"❌ {lang.get_frase(f'permissions.{perm}')}\n" for perm in permissions])
-            embed = disnake.Embed(title=lang.get_frase("exceptions.error"),
-                                  description=lang.get_frase("exceptions.NotEnoughPerms"),
+            embed_value = "".join([f"❌ {lang[f'permissions.{perm}']}\n" for perm in permissions])
+            embed = disnake.Embed(title=lang["main.error"],
+                                  description=lang["exceptions.NotEnoughPerms"],
                                   color=color_codes["error"])
             embed.add_field(name="Права", value=embed_value)
             await inter.send(embed=embed)
         elif isinstance(error, MemberHigherPermissions):
             lang = LangTool(inter.guild.id)
-            embed = disnake.Embed(title=lang.get_frase("exceptions.error"),
-                                  description=lang.get_frase("exceptions.MemberHigherPermissions"),
+            embed = disnake.Embed(title=lang["main.error"],
+                                  description=lang["exceptions.MemberHigherPermissions"],
                                   color=color_codes["error"])
             await inter.send(embed=embed)
 
-    @has_permissions(["ban_members", "manage_channels"])
-    @moderation.sub_command()
+    @has_permissions(["kick_members"])
+    @moderation.sub_command(description="выгнать участника с сервера")
     async def kick(self, inter: disnake.ApplicationCommandInteraction, member: disnake.Member,
                    reason: str = None):
         lang = LangTool(inter.guild.id)
         author = inter.author
         if reason is None:
-            reason = lang.get_frase("moderation.reasonIsNone")
+            reason = lang["moderation.reasonIsNone"]
         await inter.channel.purge(limit=1)
         await member.kick(reason=reason)
-        await inter.send(lang.get_frase("moderation.kick").format(author=author, member=member,
-                                                                  reason=reason))
+        await inter.send(lang["moderation.kick"].format(author=author, member=member,
+                                                        reason=reason))
 
     @has_permissions(["ban_members"])
-    @moderation.sub_command()
+    @moderation.sub_command(description="забанить участника")
     async def ban(self, inter, member: disnake.Member, *, reason=None):
         lang = LangTool(inter.guild.id)
         author = inter.author
         if reason is None:
-            reason = lang.get_frase("moderation.reasonIsNone")
+            reason = lang["moderation.reasonIsNone"]
         await member.ban(reason=reason)
-        await inter.send(lang.get_frase("moderation.ban").format(author=author, member=member,
-                                                                 reason=reason))
-
-    @moderation.sub_command()
-    @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, member, *, reason='Причина не указана'):
-        author = ctx.message.author
-        await ctx.channel.purge(limit=1)
-        await ctx.member.unban(reason=reason)
-        await ctx.send(f"Пользователь был разбанен {author} по причине {reason}")
+        await inter.send(lang["moderation.ban"].format(author=author, member=member,
+                                                       reason=reason))
 
     @has_permissions(["moderate_members"])
-    @moderation.sub_command()
+    @moderation.sub_command(description="мут/размут участника")
     async def mute(self, inter: disnake.ApplicationCommandInteraction,
                    member: disnake.Member = Param(description='пользователь'),
                    seconds: float = 0,
@@ -73,21 +65,20 @@ class Moderation(commands.Cog):
                    hours: int = 0,
                    days: int = 0,
                    reason=None):
-        lang = LangTool(inter.guild.id)
+        locale = LangTool(inter.guild.id)
         author = inter.author
         if member.current_timeout is None:
             timeout = datetime.timedelta(seconds=seconds, minutes=minutes, hours=hours, days=days)
             if reason is None:
-                reason = lang.get_frase("moderation.reasonIsNone")
+                reason = locale["moderation.reasonIsNone"]
             await member.timeout(duration=timeout, reason=reason)
-            await inter.send(lang.get_frase("moderation.mute"))
+            await inter.send(locale["moderation.mute"])
         else:
             await member.timeout(duration=0)
-            await inter.send(lang.get_frase("moderation.unmute"))
+            await inter.send(locale["moderation.unmute"])
 
     @has_permissions(["manage_messages"])
-    @commands.slash_command()
-    @commands.has_permissions(manage_messages=True)
+    @commands.slash_command(description="очистка чата на указанное кол-во сообщений")
     async def clear(self, inter: disnake.ApplicationCommandInteraction, amount=1):
         await inter.delete_original_message()
         await inter.channel.purge(limit=amount)

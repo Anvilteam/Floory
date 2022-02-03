@@ -11,6 +11,13 @@ class LangTool:
         self.guild_id = guild_id
         self._set_guild_lang()
 
+    def __getitem__(self, key):
+        category, frase = key.split(".")
+        lang = self.locale
+        with open(f"locales/{lang}/{category}.json", "r", encoding='UTF-8') as f:
+            data = json.load(f)
+            return data[frase]
+
     def _set_guild_lang(self):
         locale = str(redis_client.get(self.guild_id))[2:-1]
         if locale is not None:
@@ -18,20 +25,15 @@ class LangTool:
         locale = cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {self.guild_id}")
         self.locale = locale[0]
 
-    def get_frase(self, frase: str) -> str:
-        category, frase = frase.split(".")
-        lang = self.locale
-        with open(f"locales/{lang}/{category}.json", "r", encoding='UTF-8') as f:
-            data = json.load(f)
-            return data[frase]
 
-
-def has_permissions(permissions: list = None):
+def has_permissions(permissions: list = None, position_check=True):
     def predicate(inter):
-        final_check = inter.author.top_role > inter.filled_options["member"].top_role
-        if final_check:
-            author_perms = inter.author.guild_permissions
-            refreshed_ = modify_permissions(author_perms)
+        check = True
+        if position_check:
+            check = inter.author.top_role > inter.filled_options["member"].top_role
+        if check:
+            author_perms: disnake.Permissions = inter.author.guild_permissions
+            refreshed_: dict = modify_permissions(author_perms)
             # iter(author_perms) -> (permission, value)
             missing_perms = [p for p in permissions if not refreshed_[p]]
             if len(missing_perms) != 0:
@@ -44,6 +46,16 @@ def has_permissions(permissions: list = None):
     return commands.check(predicate)
 
 
+def is_guild_owner():
+    def predicate(inter):
+        check = inter.author == inter.guild.owner
+        if not check:
+            raise NotGuildOwner
+        return True
+
+    return commands.check(predicate)
+
+
 def is_bot_developer():
     def predicate(inter):
         # Список id разработчиков бота
@@ -51,6 +63,7 @@ def is_bot_developer():
         if inter.author.id not in developers:
             raise NotBotDeveloper
         return True
+
     return commands.check(predicate)
 
 

@@ -5,6 +5,7 @@ import yaml
 import logging
 from disnake.ext import commands, tasks
 from core.database import redis_client, cur
+from core.tools import LangTool, color_codes
 from progress.bar import Bar
 
 test_guilds = [737351356079145002,  # FallenSky
@@ -12,13 +13,11 @@ test_guilds = [737351356079145002,  # FallenSky
                ]
 
 # Настройки логирования
-
 logging.basicConfig(
     format='[%(asctime)s][%(levelname)s][%(name)s]: %(message)s',
     level=logging.INFO)
 
 logger = logging.getLogger('floorybot')
-
 logger.setLevel(logging.DEBUG)
 
 # Загрузка конфигурации и клиента
@@ -65,6 +64,20 @@ async def on_guild_remove(guild: disnake.Guild):
     cur("query", f"DELETE FROM `guilds` WHERE `guild` = {guild.id};")
 
 
+@client.event
+async def on_slash_command_error(inter, error):
+    locale = LangTool(inter.guild.id)
+    embed = disnake.Embed(title=locale["main.error"],
+                          color=color_codes["error"])
+    if isinstance(error, commands.CommandOnCooldown):
+        embed.add_field(name=f"```CommandOnCooldown```",
+                        value=locale["exceptions.CommandOnCooldown"].format(
+                            time=f'{error.retry_after:.2f}{locale["main.second"]}'))
+        embed.set_thumbnail(file=disnake.File("logo.png"))
+        await inter.send(embed=embed, delete_after=30.0)
+    logger.error(error)
+
+
 @tasks.loop(seconds=120.0)
 async def change_status():
     """Каждые 60 секунд меняет статус"""
@@ -72,6 +85,7 @@ async def change_status():
     await client.change_presence(activity=disnake.Activity(name=current_status, type=disnake.ActivityType.playing))
 
 
+@commands.has_permissions(manage_nicknames=True)
 @client.slash_command()
 async def ping(inter: disnake.ApplicationCommandInteraction):
     ping = client.latency
