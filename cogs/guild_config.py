@@ -50,20 +50,19 @@ class GuildConfig(commands.Cog):
     async def news(self, inter: disnake.ApplicationCommandInteraction,
                    status: str = Param(autocomplete=autocomplete_statuses)):
         lang = LangTool(inter.guild.id)
-        match status:
-            case "on":
-                news_channel = cur("fetch", f"SELECT `news-channel` FROM `guilds` WHERE `guild` = {inter.guild.id}")[0]
-                print(type(news_channel))
-                if news_channel is not None:
-                    cur("query", f"UPDATE `guilds` SET `news` = 'true' WHERE `guild` = {inter.guild.id}")
-                    await inter.send(lang["guild_config.news_on"])
-                else:
-                    await inter.send(lang["guild_config.news_channel_req"])
-            case "off":
-                cur("query", f"UPDATE `guilds` SET `news` = 'false' WHERE `guild` = {inter.guild.id}")
-                await inter.send(lang["guild_config.news_off"])
-            case _:
-                await inter.send(lang["guild_config.invalid_arg"])
+        if status == "on":
+            news_channel = cur("fetch", f"SELECT `news-channel` FROM `guilds` WHERE `guild` = {inter.guild.id}")[0]
+            print(type(news_channel))
+            if news_channel is not None:
+                cur("query", f"UPDATE `guilds` SET `news` = 'true' WHERE `guild` = {inter.guild.id}")
+                await inter.send(lang["guild_config.news_on"])
+            else:
+                await inter.send(lang["guild_config.news_channel_req"])
+        elif status == "off":
+            cur("query", f"UPDATE `guilds` SET `news` = 'false' WHERE `guild` = {inter.guild.id}")
+            await inter.send(lang["guild_config.news_off"])
+        else:
+            await inter.send(lang["guild_config.invalid_arg"])
 
     @commands.cooldown(1, 360)
     @config.sub_command()

@@ -21,11 +21,10 @@ class Fun(commands.Cog):
         coin_choice = random.choice(variants)
         await inter.response.send_message(lang["games.toss"])
         time.sleep(1.5)
-        match coin_choice:
-            case "орел":
-                await inter.edit_original_message(content=lang["games.eagleWin"])
-            case _:
-                await inter.edit_original_message(content=lang["games.tailWin"])
+        if coin_choice == "орел":
+            await inter.edit_original_message(content=lang["games.eagleWin"])
+        else:
+            await inter.edit_original_message(content=lang["games.tailWin"])
 
 
 def setup(client):
