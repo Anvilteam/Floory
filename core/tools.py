@@ -10,7 +10,7 @@ color_codes = {'default': 0x3ef0a9,
 class LangTool:
     def __init__(self, guild_id):
         self.guild_id = guild_id
-        self._set_guild_lang()
+        self.__set_guild_lang()
 
     def __getitem__(self, key):
         category, frase = key.split(".")
@@ -19,24 +19,24 @@ class LangTool:
             data = json.load(f)
             return data[frase]
 
-    def _set_guild_lang(self):
-        locale = str(redis_client.get(self.guild_id))[2:-1]
+    def __set_guild_lang(self):
+        locale = redis_client.get(self.guild_id).decode()
         if locale is not None:
             self.locale = locale
-        locale = cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {self.guild_id}")
-        self.locale = locale[0]
+        else:
+            locale = cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {self.guild_id}")
+            self.locale = locale[0]
 
 
-def has_permissions(permissions: List[str] = None, position_check=True):
+def has_permissions(*perms: str, position_check: bool = True):
     def predicate(inter):
         check = True
         if position_check:
             check = inter.author.top_role > inter.filled_options["member"].top_role
         if check:
-            author_perms: disnake.Permissions = inter.author.guild_permissions
-            refreshed_: dict = modify_permissions(author_perms)
+            author_perms: dict = perms_to_dict(inter.author.guild_permissions)
             # iter(author_perms) -> (permission, value)
-            missing_perms = [p for p in permissions if not refreshed_[p]]
+            missing_perms = [p for p in perms if not author_perms[p]]
             if len(missing_perms) != 0:
                 raise NotEnoughPerms(missing_perms)
         else:
@@ -68,7 +68,9 @@ def is_bot_developer():
     return commands.check(predicate)
 
 
-def modify_permissions(perms: disnake.Permissions) -> dict:
+def perms_to_dict(perms: disnake.Permissions) -> dict:
+    """Превращает disnake.Permissions в словарь для удобной работы"""
+
     permissions = {}
     for perm, value in perms:
         permissions[perm] = value

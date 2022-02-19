@@ -1,8 +1,7 @@
 import disnake
-import core.tools
 from disnake.ext import commands
 from disnake.ext.commands import Param
-from core.tools import LangTool
+from core.tools import LangTool, is_guild_owner
 from core.database import cur
 from core.exceptions import *
 from typing import List
@@ -23,7 +22,7 @@ class GuildConfig(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @core.tools.is_guild_owner()
+    @is_guild_owner()
     @commands.slash_command()
     async def config(self, inter):
         pass

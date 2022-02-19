@@ -1,0 +1,18 @@
+bot:
+  token: "your bot token"
+  prefix: "prefix"
+  other:
+    invite-bot: "bot invite link"
+    invite-support-server: "support server link"
+
+  splashes:
+    - "Test splash 1"
+    - "Test splash 2"
+    - "Test splash 3"
+
+mysql:
+  host: "127.0.0.1"
+  user: "user"
+  port: 1234
+  password: "password"
+  database: "dbName"

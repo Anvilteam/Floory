@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import Param
-from core.tools import LangTool, modify_permissions, has_permissions
+from core.tools import LangTool, perms_to_dict, has_permissions
 
 
 class Utils(commands.Cog):
@@ -74,12 +74,12 @@ class Utils(commands.Cog):
             embed.set_thumbnail(url=str(icon))
         await inter.send(embed=embed, delete_after=30.0)
 
-    @has_permissions(["manage_roles"], position_check=False)
+    @has_permissions("manage_roles", position_check=False)
     @utils.sub_command(description="получение прав конкретного пользователя")
     async def permissions(self, inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
         emojies = {0: '❌', 1: '✅'}
         lang = LangTool(inter.guild.id)
-        member_perms = modify_permissions(member.guild_permissions)
+        member_perms = perms_to_dict(member.guild_permissions)
         # '❌|✅', 'permission translate', 'new line'
         embed_value = "".join(
             [f"{emojies[member_perms[perm]]} {lang[f'permissions.{perm}']}\n" for perm in member_perms])
@@ -88,7 +88,7 @@ class Utils(commands.Cog):
         embed.add_field(name=lang["utils.perms_list"], value=embed_value)
         await inter.send(embed=embed, delete_after=30.0)
 
-    @utils.sub_command()
+    @utils.sub_command(description="получение аватара пользователя")
     async def avatar(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member):
         embed = disnake.Embed(title=member, color=0x3ef0a9)
