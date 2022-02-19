@@ -85,6 +85,21 @@ async def change_status():
     await client.change_presence(activity=disnake.Activity(name=current_status, type=disnake.ActivityType.playing))
 
 
+@client.slash_command()
+async def about(inter: disnake.ApplicationCommandInteraction):
+    embed = disnake.Embed(title="О боте")
+    embed.add_field("Что такое FlooryBot?",
+                    value="FlooryBot был придуман как open-source альтернатива другим бота для дискорда.\n"
+                          "Бот содержит стандартные функции модерации, утилит и других полезных команд.\n"
+                          "Стоит сказать, что состоит только из слэш команд, это необходимо для обеспечения меньшего кол-ва ошибок"
+                          "в связи с человеческим фактором.\n"
+                          "Если Вы хотите помочь в разработке или просто посмотреть на бота изнутри то ссылка на Github ниже")
+    embed.add_field(name="Github", value="||https://github.com/Anvilteam/Floory||", inline=False)
+    embed.add_field("P.S.", value="FlooryBot является дочерним проектом AnvilDev", inline=False)
+    embed.set_thumbnail(file=disnake.File("logo.png"))
+    await inter.send(embed=embed)
+
+
 @commands.has_permissions(manage_nicknames=True)
 @client.slash_command()
 async def ping(inter: disnake.ApplicationCommandInteraction):
@@ -92,5 +107,4 @@ async def ping(inter: disnake.ApplicationCommandInteraction):
     await inter.response.send_message(f'Pong! {ping * 1000:.0f} ms')
 
 
-client.load_extension("jishaku")
 client.run(cfg["bot"]["token"])

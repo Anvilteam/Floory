@@ -77,7 +77,7 @@ class Moderation(commands.Cog):
             await member.timeout(duration=0)
             await inter.send(locale["moderation.unmute"])
 
-    @has_permissions(["manage_messages"])
+    @has_permissions(["manage_messages"], position_check=False)
     @commands.slash_command(description="очистка чата на указанное кол-во сообщений")
     async def clear(self, inter: disnake.ApplicationCommandInteraction, amount=1):
         await inter.delete_original_message()

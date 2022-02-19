@@ -24,7 +24,7 @@ class Utils(commands.Cog):
             is_owner = locale["main.true"]
         else:
             is_owner = locale["main.false"]
-        embed = disnake.Embed(title="📖 " + locale["utils.uStatistics"].format(member=member),
+        embed = disnake.Embed(title="📖 " + locale["utils.statistics"] + str(member),
                               color=0x3ef0a9)
         embed.add_field(name="✒ " + locale["utils.real_name"],
                         value=name)

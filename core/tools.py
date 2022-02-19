@@ -1,6 +1,7 @@
 import json
 from core.exceptions import *
 from core.database import redis_client, cur
+from typing import List
 
 color_codes = {'default': 0x3ef0a9,
                'error': 0x3ef0a9}
@@ -26,7 +27,7 @@ class LangTool:
         self.locale = locale[0]
 
 
-def has_permissions(permissions: list = None, position_check=True):
+def has_permissions(permissions: List[str] = None, position_check=True):
     def predicate(inter):
         check = True
         if position_check:
