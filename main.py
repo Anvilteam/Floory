@@ -3,6 +3,7 @@ import random
 import os
 import yaml
 import logging
+import traceback
 from disnake.ext import commands, tasks
 from core.database import redis_client, cur
 from core.tools import LangTool, color_codes
@@ -67,6 +68,9 @@ async def on_guild_remove(guild: disnake.Guild):
 @client.event
 async def on_slash_command_error(inter, error):
     locale = LangTool(inter.guild.id)
+    formatted = "".join(
+        traceback.format_exception(type(error), error, error.__traceback__)
+    )
     embed = disnake.Embed(title=locale["main.error"],
                           color=color_codes["error"])
     if isinstance(error, commands.CommandOnCooldown):
@@ -75,7 +79,7 @@ async def on_slash_command_error(inter, error):
                             time=f'{error.retry_after:.2f}{locale["main.second"]}'))
         embed.set_thumbnail(file=disnake.File("logo.png"))
         await inter.send(embed=embed, delete_after=30.0)
-    logger.error(error)
+    logger.error(formatted)
 
 
 @tasks.loop(seconds=120.0)

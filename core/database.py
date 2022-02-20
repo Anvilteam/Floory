@@ -16,13 +16,14 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 def cur(_type, arg):
     connection.autocommit(True)
     with connection.cursor() as cursor:
-        if _type == "query":
-            cursor.execute(arg)
-        elif _type == "fetch":
-            cursor.execute(arg)
-            result = cursor.fetchone()
-            return result
-        else:
-            cursor.execute(arg)
-            result = cursor.fetchall()
-            return result
+        match _type:
+            case 'query':
+                cursor.execute(arg)
+            case 'fetch':
+                cursor.execute(arg)
+                result = cursor.fetchone()
+                return result
+            case 'fetchall':
+                cursor.execute(arg)
+                result = cursor.fetchall()
+                return result
