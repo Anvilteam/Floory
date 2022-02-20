@@ -5,6 +5,8 @@ from typing import List
 
 color_codes = {'default': 0x3ef0a9,
                'error': 0x3ef0a9}
+bot_black_list = list()
+developers = [551439984255696908]
 
 
 class LangTool:
@@ -20,9 +22,9 @@ class LangTool:
             return data[frase]
 
     def __set_guild_lang(self):
-        locale = redis_client.get(self.guild_id).decode()
+        locale = redis_client.get(self.guild_id)
         if locale is not None:
-            self.locale = locale
+            self.locale = locale.decode()
         else:
             locale = cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {self.guild_id}")
             self.locale = locale[0]
@@ -60,9 +62,8 @@ def is_guild_owner():
 def is_bot_developer():
     def predicate(inter):
         # Список id разработчиков бота
-        developers = [551439984255696908]
         if inter.author.id not in developers:
-            raise NotBotDeveloper
+            raise NotDeveloper
         return True
 
     return commands.check(predicate)
@@ -76,6 +77,9 @@ def perms_to_dict(perms: disnake.Permissions) -> dict:
         permissions[perm] = value
     return permissions
 
+def not_in_black_list():
+    def predicate(inter):
+        pass
 
 def benchmark(func):
     import time

@@ -3,9 +3,12 @@ import random
 import os
 import yaml
 import logging
-import traceback
 from disnake.ext import commands, tasks
+
+import core.tools
 from core.database import redis_client, cur
+from core.views import *
+from core.exceptions import *
 from core.tools import LangTool, color_codes
 from progress.bar import Bar
 
@@ -23,10 +26,10 @@ logger.setLevel(logging.DEBUG)
 
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
-client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all(),
-                      test_guilds=test_guilds,
-                      sync_commands_debug=True,
-                      sync_permissions=True)
+client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
+                      #test_guilds=test_guilds,
+                      #sync_commands_debug=True,
+                      #sync_permissions=True)
 logger.info("Инициализация команд и событий..")
 
 
@@ -66,11 +69,9 @@ async def on_guild_remove(guild: disnake.Guild):
 
 
 @client.event
-async def on_slash_command_error(inter, error):
+async def on_slash_command_error(inter, error: commands.CheckFailure):
     locale = LangTool(inter.guild.id)
-    formatted = "".join(
-        traceback.format_exception(type(error), error, error.__traceback__)
-    )
+    formatted = f"[{inter.guild.name}]|{error}"
     embed = disnake.Embed(title=locale["main.error"],
                           color=color_codes["error"])
     if isinstance(error, commands.CommandOnCooldown):
@@ -80,6 +81,28 @@ async def on_slash_command_error(inter, error):
         embed.set_thumbnail(file=disnake.File("logo.png"))
         await inter.send(embed=embed, delete_after=30.0)
     logger.error(formatted)
+
+
+@client.event
+async def on_button_click(inter: disnake.MessageInteraction):
+    match inter.component.custom_id:
+        case 'idea':
+            embed = inter.message.embeds[0]
+            desc = embed.fields[0]
+            supporters = embed.fields[1]
+            if inter.author.mention not in supporters.value:
+                embed.clear_fields()
+                embed.add_field(name=desc.name, value=desc.value)
+                embed.add_field(name=supporters.name, value=supporters.value + f"\n{inter.author.mention}")
+                await inter.response.edit_message(view=Idea(), embed=embed)
+            else:
+                await inter.send("Вы уже поддержали данную идею", ephemeral=True)
+        case 'bug':
+            if inter.author.id in core.tools.developers:
+                await inter.response.defer()
+                await inter.delete_original_message()
+            else:
+                await inter.send("Вы не разработчик!", ephemeral=True)
 
 
 @tasks.loop(seconds=120.0)
@@ -102,6 +125,34 @@ async def about(inter: disnake.ApplicationCommandInteraction):
     embed.add_field("P.S.", value="FlooryBot является дочерним проектом AnvilDev", inline=False)
     embed.set_thumbnail(file=disnake.File("logo.png"))
     await inter.send(embed=embed)
+
+
+@client.slash_command(description="предложить идею для бота")
+async def idea(inter: disnake.ApplicationCommandInteraction,
+               title: str = commands.Param(description="Название идеи"),
+               description: str = commands.Param(description="Подробное описание идеи")):
+    channel = client.get_channel(944878540741025813)
+    embed = disnake.Embed(title=title)
+    embed.add_field(name="Описание", value=description)
+    embed.add_field(name="Поддержали", value=f"{inter.author.mention}")
+    embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
+    view = Idea()
+    msg = await channel.send(embed=embed, view=view)
+    await msg.create_thread(name=title)
+    await inter.send("Ваша идея была успешно предложена")
+
+
+@client.slash_command(description="сообщить о баге/ошибке в боте")
+async def bug(inter: disnake.ApplicationCommandInteraction,
+              bug_name: str = commands.Param(description="Название бага"),
+              bug_description: str = commands.Param(description="Подробное описание бага")):
+    channel = client.get_channel(944979832092114997)
+    embed = disnake.Embed(title="Баг " + bug_name)
+    embed.add_field(name="Описание", value=bug_description)
+    embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
+    msg = await channel.send(embed=embed, view=CloseBugTicket())
+    await msg.create_thread(name=bug_name)
+    await inter.send("Баг был успешно отправлен", ephemeral=True)
 
 
 @commands.has_permissions(manage_nicknames=True)

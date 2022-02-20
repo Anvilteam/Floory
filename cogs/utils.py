@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import Param
-from core.tools import LangTool, perms_to_dict, has_permissions
+from core.tools import LangTool, perms_to_dict, has_permissions, is_guild_owner
 
 
 class Utils(commands.Cog):

@@ -2,24 +2,27 @@ import disnake
 from disnake.ext import commands
 
 
-class NotEnoughPerms(disnake.ext.commands.CommandInvokeError):
+class NotEnoughPerms(commands.CheckFailure):
     def __init__(self, perms):
         self.permissions = perms
-
-    def __str__(self):
-        return 'Not enough permissions to execute the command'
+        super().__init__('NotEnoughPerms: Not enough permissions to execute the command')
 
 
-class MemberHigherPermissions(disnake.ext.commands.CommandInvokeError):
-    def __str__(self):
-        return 'Member has higher permissions'
+class MemberHigherPermissions(commands.CheckFailure):
+    def __init__(self):
+        super().__init__('Member has higher permissions')
 
 
-class NotGuildOwner(commands.CommandError):
-    def __str__(self):
-        return 'Member is not owner this guild'
+class NotGuildOwner(commands.CheckFailure):
+    def __init__(self):
+        super().__init__('Member is not owner this guild')
 
 
-class NotBotDeveloper(commands.CommandError):
-    def __str__(self):
-        return 'Member is not a developer of FlooryBot'
+class NotDeveloper(commands.CheckFailure):
+    def __init__(self):
+        super().__init__('NotDeveloper: Member is not a developer of FlooryBot')
+
+
+class InBlacklist(commands.CommandError):
+    def __init__(self):
+        super().__init__('InBlacklist: Member is blocked by bot developers')

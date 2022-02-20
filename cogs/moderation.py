@@ -10,6 +10,7 @@ class Moderation(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    @commands.cooldown(1, 600)
     @commands.slash_command()
     async def moderation(self, inter):
         pass
@@ -84,6 +85,7 @@ class Moderation(commands.Cog):
     @has_permissions("manage_messages", position_check=False)
     @commands.slash_command(description="очистка чата на указанное кол-во сообщений")
     async def clear(self, inter: disnake.ApplicationCommandInteraction, amount: int = 1):
+        await inter.response.defer()
         await inter.delete_original_message()
         await inter.channel.purge(limit=amount)
 
