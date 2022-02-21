@@ -1,4 +1,5 @@
 import disnake
+import core
 
 
 class Idea(disnake.ui.View):
@@ -7,7 +8,16 @@ class Idea(disnake.ui.View):
 
     @disnake.ui.button(label="Поддерживаю", emoji='⭐', style=disnake.ButtonStyle.grey, custom_id='idea')
     async def support(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
-        pass
+        embed = inter.message.embeds[0]
+        desc = embed.fields[0]
+        supporters = embed.fields[1]
+        if inter.author.mention not in supporters.value:
+            embed.clear_fields()
+            embed.add_field(name=desc.name, value=desc.value)
+            embed.add_field(name=supporters.name, value=supporters.value + f"\n{inter.author.mention}")
+            await inter.response.edit_message(view=Idea(), embed=embed)
+        else:
+            await inter.send("Вы уже поддержали данную идею", ephemeral=True)
 
 
 class CloseBugTicket(disnake.ui.View):
@@ -16,4 +26,8 @@ class CloseBugTicket(disnake.ui.View):
 
     @disnake.ui.button(label="Закрыть обсуждение", emoji='❌', style=disnake.ButtonStyle.grey, custom_id='bug')
     async def close(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
-        pass
+        if inter.author.id in core.tools.developers:
+            await inter.response.defer()
+            await inter.delete_original_message()
+        else:
+            await inter.send("Вы не разработчик!", ephemeral=True)

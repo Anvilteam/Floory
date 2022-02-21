@@ -1,4 +1,5 @@
 import disnake
+import random
 from disnake.ext import commands
 from disnake.ext.commands import Param
 from core.tools import LangTool, perms_to_dict, has_permissions, is_guild_owner
@@ -94,6 +95,27 @@ class Utils(commands.Cog):
         embed = disnake.Embed(title=member, color=0x3ef0a9)
         embed.set_image(url=member.display_avatar.url)
         await inter.response.send_message(embed=embed)
+
+    @has_permissions("administrator", position_check=False)
+    @utils.sub_command(description="сделать голосование")
+    async def voting(self, inter: disnake.ApplicationCommandInteraction,
+                     title: str = Param(description="название голосования"),
+                     description: str = Param(description="описание голосования"),
+                     image: disnake.Attachment = Param(default=None, description="картинка (по желанию)"),
+                     variants: str = Param(default="варианты для голосование (через пробел)")):
+        view = disnake.ui.View()
+        embed = disnake.Embed(title=title, description=description)
+        vars = variants.split('|')
+        for var in vars:
+            embed.add_field(name=var, value='-----')
+            btn = disnake.ui.Button(label=var + '|0', custom_id=f'voting-{random.randint(0, 100)+inter.id}')
+            view.add_item(btn)
+
+        if image is not None and image.content_type == 'image/png':
+            embed.set_image(image.url)
+        embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
+        await inter.response.defer()
+        await inter.channel.send(embed=embed, view=view)
 
 
 def setup(client):

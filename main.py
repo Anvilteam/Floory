@@ -4,7 +4,7 @@ import os
 import yaml
 import logging
 from disnake.ext import commands, tasks
-
+from typing import List
 import core.tools
 from core.database import redis_client, cur
 from core.views import *
@@ -15,6 +15,12 @@ from progress.bar import Bar
 test_guilds = [737351356079145002,  # FallenSky
                906795717643882496  # FlooryHome
                ]
+categories = ['moderation', 'utils', 'guild_config', 'fun']
+
+
+async def autocomplete_categories(inter, string: str) -> List[str]:
+    return [category for category in categories if string.lower() in category.lower()]
+
 
 # Настройки логирования
 logging.basicConfig(
@@ -27,9 +33,9 @@ logger.setLevel(logging.DEBUG)
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
 client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
-                      #test_guilds=test_guilds,
-                      #sync_commands_debug=True,
-                      #sync_permissions=True)
+#test_guilds=test_guilds,
+#sync_commands_debug=True,
+#sync_permissions=True)
 logger.info("Инициализация команд и событий..")
 
 
@@ -85,24 +91,41 @@ async def on_slash_command_error(inter, error: commands.CheckFailure):
 
 @client.event
 async def on_button_click(inter: disnake.MessageInteraction):
-    match inter.component.custom_id:
-        case 'idea':
+    match inter.component.custom_id.split('-'):
+        case 'voting':
+            msg = inter.message
             embed = inter.message.embeds[0]
-            desc = embed.fields[0]
-            supporters = embed.fields[1]
-            if inter.author.mention not in supporters.value:
-                embed.clear_fields()
-                embed.add_field(name=desc.name, value=desc.value)
-                embed.add_field(name=supporters.name, value=supporters.value + f"\n{inter.author.mention}")
-                await inter.response.edit_message(view=Idea(), embed=embed)
-            else:
-                await inter.send("Вы уже поддержали данную идею", ephemeral=True)
-        case 'bug':
-            if inter.author.id in core.tools.developers:
-                await inter.response.defer()
-                await inter.delete_original_message()
-            else:
-                await inter.send("Вы не разработчик!", ephemeral=True)
+            fields = embed.fields
+
+            def get_vote_index(fields: list, name) -> int:
+                for i in range(len(fields) - 1):
+                    if fields[i].name == name:
+                        return i
+
+            def get_button_index(buttons: List[disnake.ui.Button], label: str):
+                for i in range(len(buttons) - 1):
+                    btn = buttons[i]
+                    if btn.label.split('|')[0] == label:
+                        return i
+
+            button: disnake.ui.Button = inter.component
+            label, counter = button.label.split('|')
+            f_index = get_vote_index(fields, label)
+            f = fields[f_index]
+            if inter.author.mention not in f.value:
+                embed.set_field_at(f_index, value=f+f'\n{inter.author.mention}')
+                button.label = label + f'|{int(counter) + 1}'
+                msg_components = msg.components
+                btn_index = get_button_index(msg_components, label)
+                msg_components[btn_index] = button
+                await inter.response.edit_message(embed=embed, components=msg_components)
+
+
+"""@client.event
+async def on_reaction_add(reaction: disnake.Reaction, member: disnake.Member):
+    msg = reaction.message.interaction
+    print(type(msg.author))
+    print(msg.author.bot)"""
 
 
 @tasks.loop(seconds=120.0)
@@ -155,7 +178,13 @@ async def bug(inter: disnake.ApplicationCommandInteraction,
     await inter.send("Баг был успешно отправлен", ephemeral=True)
 
 
-@commands.has_permissions(manage_nicknames=True)
+@client.slash_command(description="список команд бота")
+async def help(inter: disnake.ApplicationCommandInteraction,
+               category: str = commands.Param(default=None, description='категория',
+                                              autocomplete=autocomplete_categories)):
+    embed = disnake.Embed(title="Help")
+
+
 @client.slash_command()
 async def ping(inter: disnake.ApplicationCommandInteraction):
     ping = client.latency

@@ -1,6 +1,6 @@
+import asyncio
 import disnake
 import random
-import time
 from disnake.ext import commands
 from core.tools import LangTool
 
@@ -20,7 +20,7 @@ class Fun(commands.Cog):
         variants = ['орел', 'решка']
         coin_choice = random.choice(variants)
         await inter.response.send_message(lang["games.toss"])
-        time.sleep(1.5)
+        await asyncio.sleep(1)
         if coin_choice == "орел":
             await inter.edit_original_message(content=lang["games.eagleWin"])
         else:
