@@ -126,6 +126,7 @@ async def on_button_click(inter: disnake.MessageInteraction):
             msg_components: list[disnake.ui.ActionRow] = msg.components
             button_list = msg_components[0].children
             btns_counter = [button.label.split('|')[1] for button in button_list if button.style != disnake.ButtonStyle.red]
+            print(fields_names)
             print(btns_counter)
             for i in range(len(btns_counter) - 1):
                 embed.set_field_at(i, name=fields_names[i], value=btns_counter[i])
