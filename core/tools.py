@@ -27,6 +27,7 @@ class LangTool:
             self.locale = locale.decode()
         else:
             locale = cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {self.guild_id}")
+            redis_client.set(self.guild_id, locale[0])
             self.locale = locale[0]
 
 
@@ -77,9 +78,11 @@ def perms_to_dict(perms: disnake.Permissions) -> dict:
         permissions[perm] = value
     return permissions
 
+
 def not_in_black_list():
     def predicate(inter):
         pass
+
 
 def benchmark(func):
     import time

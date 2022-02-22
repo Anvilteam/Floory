@@ -28,14 +28,14 @@ logging.basicConfig(
     level=logging.INFO)
 
 logger = logging.getLogger('floorybot')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
 client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
-#test_guilds=test_guilds,
-#sync_commands_debug=True,
-#sync_permissions=True)
+# test_guilds=test_guilds,
+# sync_commands_debug=True,
+# sync_permissions=True)
 logger.info("Инициализация команд и событий..")
 
 
@@ -91,41 +91,45 @@ async def on_slash_command_error(inter, error: commands.CheckFailure):
 
 @client.event
 async def on_button_click(inter: disnake.MessageInteraction):
-    match inter.component.custom_id.split('-'):
+    match inter.component.custom_id.split('-')[0]:
         case 'voting':
             msg = inter.message
-            embed = inter.message.embeds[0]
+            embed = msg.embeds[0]
             fields = embed.fields
-
-            def get_vote_index(fields: list, name) -> int:
-                for i in range(len(fields) - 1):
-                    if fields[i].name == name:
-                        return i
-
-            def get_button_index(buttons: List[disnake.ui.Button], label: str):
-                for i in range(len(buttons) - 1):
-                    btn = buttons[i]
-                    if btn.label.split('|')[0] == label:
-                        return i
-
             button: disnake.ui.Button = inter.component
             label, counter = button.label.split('|')
-            f_index = get_vote_index(fields, label)
-            f = fields[f_index]
-            if inter.author.mention not in f.value:
-                embed.set_field_at(f_index, value=f+f'\n{inter.author.mention}')
+            votes = ''
+            for f in fields:
+                votes += f.value
+            fields_names = [f.name for f in fields]
+            chosen_index = fields_names.index(label)
+            field = fields[chosen_index]
+            logger.info(label)
+            if inter.author.mention not in votes:
                 button.label = label + f'|{int(counter) + 1}'
-                msg_components = msg.components
-                btn_index = get_button_index(msg_components, label)
-                msg_components[btn_index] = button
-                await inter.response.edit_message(embed=embed, components=msg_components)
-
-
-"""@client.event
-async def on_reaction_add(reaction: disnake.Reaction, member: disnake.Member):
-    msg = reaction.message.interaction
-    print(type(msg.author))
-    print(msg.author.bot)"""
+                msg_components: list[disnake.ui.ActionRow] = msg.components
+                button_list = msg_components[0].children
+                button_list[chosen_index] = button
+                action_row = disnake.ui.ActionRow()
+                for btn in button_list:
+                    action_row.add_button(label=btn.label, custom_id=btn.custom_id)
+                embed.set_field_at(chosen_index, name=field.name, value=field.value + f'\n{inter.author.mention}')
+                await inter.response.edit_message(embed=embed, components=[action_row])
+            else:
+                await inter.send("а фиг тебе")
+        case 'close_vote':
+            locale = LangTool(inter.guild.id)
+            msg = inter.message
+            embed = msg.embeds[0]
+            fields = embed.fields
+            fields_names = [f.name for f in fields]
+            msg_components: list[disnake.ui.ActionRow] = msg.components
+            button_list = msg_components[0].children
+            btns_counter = [button.label.split('|')[1] for button in button_list if button.style != disnake.ButtonStyle.red]
+            print(btns_counter)
+            for i in range(len(btns_counter) - 1):
+                embed.set_field_at(i, name=fields_names[i], value=btns_counter[i])
+            await inter.response.edit_message(content=locale['utils.votingEnd'], embed=embed, components=[])
 
 
 @tasks.loop(seconds=120.0)
@@ -185,10 +189,16 @@ async def help(inter: disnake.ApplicationCommandInteraction,
     embed = disnake.Embed(title="Help")
 
 
-@client.slash_command()
+@client.slash_command(description="пинг бота")
 async def ping(inter: disnake.ApplicationCommandInteraction):
     ping = client.latency
     await inter.response.send_message(f'Pong! {ping * 1000:.0f} ms')
 
+
+@client.slash_command(description="тест вебхук")
+async def webhook(inter: disnake.ApplicationCommandInteraction,
+                  channel: disnake.TextChannel):
+    await inter.channel.follow(destination=channel)
+    await inter.send("тест")
 
 client.run(cfg["bot"]["token"])

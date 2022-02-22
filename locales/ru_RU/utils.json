@@ -10,4 +10,8 @@
  "online": "Онлайн",
  "sCreated_at": "Сервер создан:",
  "members_permissions": "Права участника {member}",
- "perms_list": "Список прав"}
+ "perms_list": "Список прав",
+
+ "tmButtons": "Можно разместить не больше 4 кнопок",
+ "closeVoting": "Закрыть голосование",
+ "votingEnd": "Голосование закончено"}

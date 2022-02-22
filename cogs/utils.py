@@ -1,3 +1,4 @@
+import string
 import disnake
 import random
 from disnake.ext import commands
@@ -102,20 +103,27 @@ class Utils(commands.Cog):
                      title: str = Param(description="название голосования"),
                      description: str = Param(description="описание голосования"),
                      image: disnake.Attachment = Param(default=None, description="картинка (по желанию)"),
-                     variants: str = Param(default="варианты для голосование (через пробел)")):
+                     variants: str = Param(default="варианты для голосование (через '|')")):
+        locale = LangTool(inter.guild.id)
         view = disnake.ui.View()
         embed = disnake.Embed(title=title, description=description)
         vars = variants.split('|')
-        for var in vars:
-            embed.add_field(name=var, value='-----')
-            btn = disnake.ui.Button(label=var + '|0', custom_id=f'voting-{random.randint(0, 100)+inter.id}')
-            view.add_item(btn)
-
-        if image is not None and image.content_type == 'image/png':
-            embed.set_image(image.url)
-        embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
-        await inter.response.defer()
-        await inter.channel.send(embed=embed, view=view)
+        print(vars)
+        if len(vars) < 5:
+            for var in vars:
+                embed.add_field(name=var, value='-----')
+                custom_id = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(int(4)))
+                print(custom_id)
+                btn = disnake.ui.Button(label=var + '|0', custom_id=f'voting-{custom_id}-{inter.id}')
+                view.add_item(btn)
+            view.add_item(disnake.ui.Button(label=locale["utils.closeVoting"], style=disnake.ButtonStyle.red,
+                                            custom_id='close_vote', emoji='❌'))
+            if image is not None and image.content_type == 'image/png':
+                embed.set_image(image.url)
+            embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
+            await inter.send(embed=embed, view=view)
+        else:
+            await inter.send(locale['utils.tmButtons'])
 
 
 def setup(client):
