@@ -18,23 +18,23 @@ async def autocomplete_locales(inter, string: str) -> List[str]:
     return [locale for locale in locales if string.lower() in locale.lower()]
 
 
-class GuildConfig(commands.Cog):
+class Settings(commands.Cog):
     def __init__(self, client):
         self.client = client
 
     @is_guild_owner()
     @commands.slash_command()
-    async def config(self, inter):
+    async def settings(self, inter):
         pass
 
-    @config.error
+    @settings.error
     async def config_errors(self, inter, error):
         if isinstance(error, NotGuildOwner):
             locale = LangTool(inter.guild.id)
             await inter.send(locale["exceptions.NotGuildOwner"])
 
     @commands.cooldown(1, 360)
-    @config.sub_command()
+    @settings.sub_command()
     async def language(self, inter: disnake.ApplicationCommandInteraction,
                        locale: str = Param(autocomplete=autocomplete_locales)):
         lang = LangTool(inter.guild.id)
@@ -45,7 +45,7 @@ class GuildConfig(commands.Cog):
             await inter.send(lang["guild_config.invalid_locale"])
 
     @commands.cooldown(1, 200)
-    @config.sub_command()
+    @settings.sub_command()
     async def news(self, inter: disnake.ApplicationCommandInteraction,
                    status: str = Param(autocomplete=autocomplete_statuses)):
         lang = LangTool(inter.guild.id)
@@ -64,7 +64,7 @@ class GuildConfig(commands.Cog):
             await inter.send(lang["guild_config.invalid_arg"])
 
     @commands.cooldown(1, 360)
-    @config.sub_command()
+    @settings.sub_command()
     async def set_news_channel(self, inter: disnake.ApplicationCommandInteraction):
         lang = LangTool(inter.guild.id)
         cur("query", f"UPDATE `guilds` SET `news-channel` = {inter.channel.id} WHERE `guild` = {inter.guild.id}")
@@ -72,4 +72,4 @@ class GuildConfig(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(GuildConfig(client))
+    client.add_cog(Settings(client))

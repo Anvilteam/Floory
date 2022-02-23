@@ -108,12 +108,10 @@ class Utils(commands.Cog):
         view = disnake.ui.View()
         embed = disnake.Embed(title=title, description=description)
         vars = variants.split('|')
-        print(vars)
         if len(vars) < 5:
             for var in vars:
                 embed.add_field(name=var, value='-----')
                 custom_id = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(int(4)))
-                print(custom_id)
                 btn = disnake.ui.Button(label=var + '|0', custom_id=f'voting-{custom_id}-{inter.id}')
                 view.add_item(btn)
             view.add_item(disnake.ui.Button(label=locale["utils.closeVoting"], style=disnake.ButtonStyle.red,

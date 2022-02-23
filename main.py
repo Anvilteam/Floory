@@ -112,7 +112,7 @@ async def on_button_click(inter: disnake.MessageInteraction):
                 button_list[chosen_index] = button
                 action_row = disnake.ui.ActionRow()
                 for btn in button_list:
-                    action_row.add_button(label=btn.label, custom_id=btn.custom_id)
+                    action_row.add_button(label=btn.label, custom_id=btn.custom_id, style=btn.style)
                 embed.set_field_at(chosen_index, name=field.name, value=field.value + f'\n{inter.author.mention}')
                 await inter.response.edit_message(embed=embed, components=[action_row])
             else:
@@ -126,9 +126,7 @@ async def on_button_click(inter: disnake.MessageInteraction):
             msg_components: list[disnake.ui.ActionRow] = msg.components
             button_list = msg_components[0].children
             btns_counter = [button.label.split('|')[1] for button in button_list if button.style != disnake.ButtonStyle.red]
-            print(fields_names)
-            print(btns_counter)
-            for i in range(len(btns_counter) - 1):
+            for i in range(len(fields_names)):
                 embed.set_field_at(i, name=fields_names[i], value=btns_counter[i])
             await inter.response.edit_message(content=locale['utils.votingEnd'], embed=embed, components=[])
 
