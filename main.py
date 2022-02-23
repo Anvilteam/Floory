@@ -3,11 +3,10 @@ import random
 import os
 import yaml
 import logging
+import core
 from disnake.ext import commands, tasks
 from typing import List
-import core.tools
 from core.database import redis_client, cur
-from core.views import *
 from core.exceptions import *
 from core.tools import LangTool, color_codes
 from progress.bar import Bar
@@ -33,9 +32,9 @@ logger.setLevel(logging.INFO)
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
 client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
-# test_guilds=test_guilds,
-# sync_commands_debug=True,
-# sync_permissions=True)
+                      #test_guilds=test_guilds,
+                      #sync_commands_debug=True,
+                      #sync_permissions=True)
 logger.info("Инициализация команд и событий..")
 
 
@@ -75,7 +74,7 @@ async def on_guild_remove(guild: disnake.Guild):
 
 
 @client.event
-async def on_slash_command_error(inter, error: commands.CheckFailure):
+async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, error: commands.CheckFailure):
     locale = LangTool(inter.guild.id)
     formatted = f"[{inter.guild.name}]|{error}"
     embed = disnake.Embed(title=locale["main.error"],
@@ -84,8 +83,7 @@ async def on_slash_command_error(inter, error: commands.CheckFailure):
         embed.add_field(name=f"```CommandOnCooldown```",
                         value=locale["exceptions.CommandOnCooldown"].format(
                             time=f'{error.retry_after:.2f}{locale["main.second"]}'))
-        embed.set_thumbnail(file=disnake.File("logo.png"))
-        await inter.send(embed=embed, delete_after=30.0)
+
     elif isinstance(error, NotEnoughPerms):
         permissions = error.permissions
         embed_value = ''
@@ -94,15 +92,19 @@ async def on_slash_command_error(inter, error: commands.CheckFailure):
             embed_value += string
 
         embed = disnake.Embed(title=locale["main.error"],
-                              description=locale["exceptions.NotEnoughPerms"],
                               color=color_codes["error"])
+        embed.add_field(name=f"```NotEnoughPerms```",
+                        value=locale["exceptions.NotEnoughPerms"])
         embed.add_field(name="Права", value=embed_value)
-        await inter.send(embed=embed)
+
     elif isinstance(error, MemberHigherPermissions):
         embed = disnake.Embed(title=locale["main.error"],
-                              description=locale["exceptions.MemberHigherPermissions"],
                               color=color_codes["error"])
-        await inter.send(embed=embed)
+        embed.add_field(name=f"```MemberHigherPermissions```",
+                        value=locale["exceptions.MemberHigherPermissions"])
+
+    embed.set_thumbnail(file=disnake.File("logo.png"))
+    await inter.send(embed=embed, view=core.views.SupportServer())
     logger.error(formatted)
 
 
@@ -142,7 +144,8 @@ async def on_button_click(inter: disnake.MessageInteraction):
             fields_names = [f.name for f in fields]
             msg_components: list[disnake.ui.ActionRow] = msg.components
             button_list = msg_components[0].children
-            btns_counter = [button.label.split('|')[1] for button in button_list if button.style != disnake.ButtonStyle.red]
+            btns_counter = [button.label.split('|')[1] for button in button_list if
+                            button.style != disnake.ButtonStyle.red]
             for i in range(len(fields_names)):
                 embed.set_field_at(i, name=fields_names[i], value=btns_counter[i])
             await inter.response.edit_message(content=locale['utils.votingEnd'], embed=embed, components=[])
@@ -179,7 +182,7 @@ async def idea(inter: disnake.ApplicationCommandInteraction,
     embed.add_field(name="Описание", value=description)
     embed.add_field(name="Поддержали", value=f"{inter.author.mention}")
     embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
-    view = Idea()
+    view = core.views.Idea()
     msg = await channel.send(embed=embed, view=view)
     await msg.create_thread(name=title)
     await inter.send("Ваша идея была успешно предложена")
@@ -193,7 +196,7 @@ async def bug(inter: disnake.ApplicationCommandInteraction,
     embed = disnake.Embed(title="Баг " + bug_name)
     embed.add_field(name="Описание", value=bug_description)
     embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
-    msg = await channel.send(embed=embed, view=CloseBugTicket())
+    msg = await channel.send(embed=embed, view=core.views.CloseBugTicket())
     await msg.create_thread(name=bug_name)
     await inter.send("Баг был успешно отправлен", ephemeral=True)
 
@@ -219,5 +222,6 @@ async def webhook(inter: disnake.ApplicationCommandInteraction):
     chnl = client.get_channel(917017050495471648)
     await chnl.follow(destination=inter.channel)
     await inter.send("тест")
+
 
 client.run(cfg["bot"]["token"])

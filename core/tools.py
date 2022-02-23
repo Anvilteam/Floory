@@ -74,6 +74,8 @@ def is_bot_developer():
 
 
 def news_status(webhooks: list[disnake.Webhook]) -> tuple:
+    """Проверяет создан ли вебхук новостей на сервере"""
+
     news = None
     is_created = False
     for i in webhooks:

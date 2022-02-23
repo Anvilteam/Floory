@@ -31,3 +31,9 @@ class CloseBugTicket(disnake.ui.View):
             await inter.delete_original_message()
         else:
             await inter.send("Вы не разработчик!", ephemeral=True)
+
+
+class SupportServer(disnake.ui.View):
+    def __init__(self):
+        super().__init__()
+        self.add_item(disnake.ui.Button(label="Сервер бота", url="discord.gg/3KG3ue66rY"))
