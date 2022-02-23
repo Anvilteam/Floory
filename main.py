@@ -32,9 +32,9 @@ logger.setLevel(logging.INFO)
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
 client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
-                      #test_guilds=test_guilds,
-                      #sync_commands_debug=True,
-                      #sync_permissions=True)
+# test_guilds=test_guilds,
+# sync_commands_debug=True,
+# sync_permissions=True)
 logger.info("Инициализация команд и событий..")
 
 
@@ -63,9 +63,15 @@ async def on_ready():
 async def on_guild_join(guild: disnake.Guild):
     cur("query", f"INSERT INTO guilds (guild) VALUES({guild.id});")
     channel = guild.system_channel
+    locale = LangTool(guild.id)
     if channel is not None:
-        embed = disnake.Embed(title="test")
-        await channel.send(embed=embed)
+        embed = disnake.Embed(title=locale["inviting_title"],
+                              description=locale["inviting_description"],
+                              color=color_codes['default'])
+        embed.add_field(name=locale["faq1Q"], value=locale["faq1A"])
+        embed.add_field(name=locale["faq2Q"], value=locale["faq2A"], inline=False)
+        embed.add_field(name=locale["faq3Q"], value=locale["faq3A"], inline=False)
+        await channel.send(embed=embed, view=core.views.SupportServer())
 
 
 @client.event
@@ -173,6 +179,26 @@ async def about(inter: disnake.ApplicationCommandInteraction):
     await inter.send(embed=embed)
 
 
+@client.slash_command(description="состояние бота")
+async def status(inter: disnake.ApplicationCommandInteraction):
+    splash = random.choice(cfg["status_splashes"])
+    locale = LangTool(inter.guild.id)
+    ping = client.latency
+    guilds = len(client.guilds)
+    cmds = len(client.commands)
+    users = len(client.users)
+    owner = client.get_user(551439984255696908)
+    embed = disnake.Embed(title="FlooryBot",
+                          description=f"```{ping * 1000:.0f} ms | {splash}")
+    embed.add_field(name="" + locale["main.guilds"], value=f"```{guilds}```")
+    embed.add_field(name="⚙" + locale["main.cmds"], value=f"```{cmds}```", inline=False)
+    embed.add_field(name="👥" + locale["main.users"], value=f"```{users}```")
+    embed.add_field(name="💻" + locale["main.owner"], value=f"```{owner.name}```", inline=False)
+    embed.add_field(name="Version", value="0.3 beta")
+    embed.set_thumbnail(file=disnake.File("logo.png"))
+    await inter.send(embed=embed, view=core.views.SupportServer())
+
+
 @client.slash_command(description="предложить идею для бота")
 async def idea(inter: disnake.ApplicationCommandInteraction,
                title: str = commands.Param(description="Название идеи"),
@@ -211,17 +237,7 @@ async def help(inter: disnake.ApplicationCommandInteraction,
 @client.slash_command(description="пинг бота")
 async def ping(inter: disnake.ApplicationCommandInteraction):
     ping = client.latency
-    webhooks = await inter.guild.webhooks()
-    for i in webhooks:
-        print(i.source_channel.name)
     await inter.response.send_message(f'Pong! {ping * 1000:.0f} ms')
-
-
-@client.slash_command(description="тест вебхук")
-async def webhook(inter: disnake.ApplicationCommandInteraction):
-    chnl = client.get_channel(917017050495471648)
-    await chnl.follow(destination=inter.channel)
-    await inter.send("тест")
 
 
 client.run(cfg["bot"]["token"])
