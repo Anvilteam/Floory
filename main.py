@@ -4,6 +4,8 @@ import os
 import yaml
 import logging
 import core
+import core.views
+from datetime import datetime
 from disnake.ext import commands, tasks
 from typing import List
 from core.database import redis_client, cur
@@ -31,10 +33,10 @@ logger.setLevel(logging.INFO)
 
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
-client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
-# test_guilds=test_guilds,
-# sync_commands_debug=True,
-# sync_permissions=True)
+client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all(),
+                      test_guilds=test_guilds,
+                      sync_commands_debug=True,
+                      sync_permissions=True)
 logger.info("Инициализация команд и событий..")
 
 
@@ -60,17 +62,38 @@ async def on_ready():
 
 
 @client.event
+async def on_message(message: disnake.Message):
+    author = message.author
+    antispam = cur("fetch", f"SELECT `antispam` FROM `guilds` WHERE `guild` = {message.guild.id}")[0]
+
+    if author.guild_permissions.administrator:
+        return
+
+    def spam_check(msg: disnake.Message):
+        return msg.author == msg.author and (datetime.utcnow() - msg.created_at).seconds < 15
+
+    if antispam == 'true':
+        result = len(list(filter(lambda m: spam_check(m), client.cached_messages)))
+        if 8 <= result < 12:
+            await message.channel.send(content=message.author.mention)
+
+    logging_ = cur("fetch", f"SELECT `logging` FROM `guilds` WHERE `guild` = {message.guild.id}")[0]
+    if logging_ == 'true':
+        log_channel = cur("fetch", f"SELECT `logs-channel` FROM `guilds` WHERE `guild` = {message.guild.id}")[0]
+
+
+@client.event
 async def on_guild_join(guild: disnake.Guild):
     cur("query", f"INSERT INTO guilds (guild) VALUES({guild.id});")
     channel = guild.system_channel
     locale = LangTool(guild.id)
     if channel is not None:
-        embed = disnake.Embed(title=locale["inviting_title"],
-                              description=locale["inviting_description"],
+        embed = disnake.Embed(title=locale["main.inviting_title"],
+                              description=locale["main.inviting_description"],
                               color=color_codes['default'])
-        embed.add_field(name=locale["faq1Q"], value=locale["faq1A"])
-        embed.add_field(name=locale["faq2Q"], value=locale["faq2A"], inline=False)
-        embed.add_field(name=locale["faq3Q"], value=locale["faq3A"], inline=False)
+        embed.add_field(name=locale["main.faq1Q"], value=locale["main.faq1A"])
+        embed.add_field(name=locale["main.faq2Q"], value=locale["main.faq2A"], inline=False)
+        embed.add_field(name=locale["main.faq3Q"], value=locale["main.faq3A"], inline=False)
         await channel.send(embed=embed, view=core.views.SupportServer())
 
 
@@ -79,7 +102,7 @@ async def on_guild_remove(guild: disnake.Guild):
     cur("query", f"DELETE FROM `guilds` WHERE `guild` = {guild.id};")
 
 
-@client.event
+"""@client.event
 async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, error: commands.CheckFailure):
     locale = LangTool(inter.guild.id)
     formatted = f"[{inter.guild.name}]|{error}"
@@ -111,7 +134,7 @@ async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, e
 
     embed.set_thumbnail(file=disnake.File("logo.png"))
     await inter.send(embed=embed, view=core.views.SupportServer())
-    logger.error(formatted)
+    logger.error(formatted)"""
 
 
 @client.event
@@ -181,20 +204,21 @@ async def about(inter: disnake.ApplicationCommandInteraction):
 
 @client.slash_command(description="состояние бота")
 async def status(inter: disnake.ApplicationCommandInteraction):
-    splash = random.choice(cfg["status_splashes"])
+    splash = random.choice(cfg["bot"]["status_splashes"])
     locale = LangTool(inter.guild.id)
     ping = client.latency
     guilds = len(client.guilds)
-    cmds = len(client.commands)
+    cmds = len(client.slash_commands)
     users = len(client.users)
-    owner = client.get_user(551439984255696908)
     embed = disnake.Embed(title="FlooryBot",
-                          description=f"```{ping * 1000:.0f} ms | {splash}")
-    embed.add_field(name="" + locale["main.guilds"], value=f"```{guilds}```")
-    embed.add_field(name="⚙" + locale["main.cmds"], value=f"```{cmds}```", inline=False)
-    embed.add_field(name="👥" + locale["main.users"], value=f"```{users}```")
-    embed.add_field(name="💻" + locale["main.owner"], value=f"```{owner.name}```", inline=False)
-    embed.add_field(name="Version", value="0.3 beta")
+                          description=f"```{ping * 1000:.0f} ms | {splash}```",
+                          color=color_codes['default'])
+    embed.add_field(name="🛡 " + locale["main.guilds"], value=f"```{guilds}```")
+    embed.add_field(name="⚙ " + locale["main.cmds"], value=f"```{cmds}```", inline=False)
+    embed.add_field(name="👥 " + locale["main.users"], value=f"```{users}```")
+    embed.add_field(name="💻 " + locale["main.owners"], value=f"```Xemay#9586\nRedWolf#2007\nD3st0nλ#5637```",
+                    inline=False)
+    embed.add_field(name="🎲 Version", value="```0.3 beta```")
     embed.set_thumbnail(file=disnake.File("logo.png"))
     await inter.send(embed=embed, view=core.views.SupportServer())
 
@@ -235,7 +259,8 @@ async def help(inter: disnake.ApplicationCommandInteraction,
 
 
 @client.slash_command(description="пинг бота")
-async def ping(inter: disnake.ApplicationCommandInteraction):
+async def ping(inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
+    print(member.public_flags.spammer)
     ping = client.latency
     await inter.response.send_message(f'Pong! {ping * 1000:.0f} ms')
 

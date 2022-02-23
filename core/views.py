@@ -36,4 +36,4 @@ class CloseBugTicket(disnake.ui.View):
 class SupportServer(disnake.ui.View):
     def __init__(self):
         super().__init__()
-        self.add_item(disnake.ui.Button(label="Сервер бота", url="discord.gg/3KG3ue66rY"))
+        self.add_item(disnake.ui.Button(label="Сервер бота", url="https://discord.gg/3KG3ue66rY"))
