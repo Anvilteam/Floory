@@ -5,7 +5,7 @@ import yaml
 import logging
 import core
 import core.views
-from datetime import datetime
+from datetime import datetime, timezone
 from disnake.ext import commands, tasks
 from typing import List
 from core.database import redis_client, cur
@@ -70,7 +70,7 @@ async def on_message(message: disnake.Message):
         return
 
     def spam_check(msg: disnake.Message):
-        return msg.author == msg.author and (datetime.utcnow() - msg.created_at).seconds < 15
+        return msg.author == msg.author and (datetime.now(timezone.utc) - msg.created_at).seconds < 15
 
     if antispam == 'true':
         result = len(list(filter(lambda m: spam_check(m), client.cached_messages)))
