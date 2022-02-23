@@ -86,6 +86,23 @@ async def on_slash_command_error(inter, error: commands.CheckFailure):
                             time=f'{error.retry_after:.2f}{locale["main.second"]}'))
         embed.set_thumbnail(file=disnake.File("logo.png"))
         await inter.send(embed=embed, delete_after=30.0)
+    elif isinstance(error, NotEnoughPerms):
+        permissions = error.permissions
+        embed_value = ''
+        for perm in permissions:
+            string = f"❌ {locale[f'permissions.{perm}']}\n"
+            embed_value += string
+
+        embed = disnake.Embed(title=locale["main.error"],
+                              description=locale["exceptions.NotEnoughPerms"],
+                              color=color_codes["error"])
+        embed.add_field(name="Права", value=embed_value)
+        await inter.send(embed=embed)
+    elif isinstance(error, MemberHigherPermissions):
+        embed = disnake.Embed(title=locale["main.error"],
+                              description=locale["exceptions.MemberHigherPermissions"],
+                              color=color_codes["error"])
+        await inter.send(embed=embed)
     logger.error(formatted)
 
 
@@ -191,13 +208,16 @@ async def help(inter: disnake.ApplicationCommandInteraction,
 @client.slash_command(description="пинг бота")
 async def ping(inter: disnake.ApplicationCommandInteraction):
     ping = client.latency
+    webhooks = await inter.guild.webhooks()
+    for i in webhooks:
+        print(i.source_channel.name)
     await inter.response.send_message(f'Pong! {ping * 1000:.0f} ms')
 
 
 @client.slash_command(description="тест вебхук")
-async def webhook(inter: disnake.ApplicationCommandInteraction,
-                  channel: disnake.TextChannel):
-    await inter.channel.follow(destination=channel)
+async def webhook(inter: disnake.ApplicationCommandInteraction):
+    chnl = client.get_channel(917017050495471648)
+    await chnl.follow(destination=inter.channel)
     await inter.send("тест")
 
 client.run(cfg["bot"]["token"])

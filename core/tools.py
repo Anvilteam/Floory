@@ -1,4 +1,7 @@
 import json
+
+import disnake
+
 from core.exceptions import *
 from core.database import redis_client, cur
 from typing import List
@@ -70,6 +73,17 @@ def is_bot_developer():
     return commands.check(predicate)
 
 
+def news_status(webhooks: list[disnake.Webhook]) -> tuple:
+    news = None
+    is_created = False
+    for i in webhooks:
+        if i.type == disnake.WebhookType.channel_follower and i.source_channel.id == 917017050495471648:
+            is_created = True
+            news = i
+            break
+    return is_created, news
+
+
 def perms_to_dict(perms: disnake.Permissions) -> dict:
     """Превращает disnake.Permissions в словарь для удобной работы"""
 
@@ -82,15 +96,3 @@ def perms_to_dict(perms: disnake.Permissions) -> dict:
 def not_in_black_list():
     def predicate(inter):
         pass
-
-
-def benchmark(func):
-    import time
-
-    def wrapper():
-        start = time.time()
-        func()
-        end = time.time()
-        print('[*] Время выполнения: {} секунд.'.format(end - start))
-
-    return wrapper
