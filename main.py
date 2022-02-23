@@ -33,10 +33,10 @@ logger.setLevel(logging.INFO)
 
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
-client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all(),
-                      test_guilds=test_guilds,
-                      sync_commands_debug=True,
-                      sync_permissions=True)
+client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
+                      #test_guilds=test_guilds,
+                      #sync_commands_debug=True,
+                      #sync_permissions=True)
 logger.info("Инициализация команд и событий..")
 
 
