@@ -65,8 +65,13 @@ async def on_ready():
 async def on_message(message: disnake.Message):
     author = message.author
     antispam = await cur("fetch", f"SELECT `antispam` FROM `guilds` WHERE `guild` = {message.guild.id}")
+    allowedSpam = await cur("fetch", f"SELECT `allowedspam` FROM `guilds` WHERE `guild` = {message.guild.id}")
+    print(allowedSpam)
+    print(type(allowedSpam))
 
     if author.guild_permissions.administrator:
+        return
+    if message.channel in allowedSpam:
         return
 
     logging_ = await cur("fetch", f"SELECT `logging` FROM `guilds` WHERE `guild` = {message.guild.id}")
@@ -197,6 +202,13 @@ async def change_status():
     """Каждые 60 секунд меняет статус"""
     current_status = random.choice(cfg["bot"]["splashes"])
     await client.change_presence(activity=disnake.Activity(name=current_status, type=disnake.ActivityType.playing))
+
+
+@client.slash_command()
+async def setup(inter: disnake.ApplicationCommandInteraction):
+    await cur("query", f"DELETE FROM `guilds` WHERE `guild` = {inter.guild.id};")
+    await cur("query", "UPDATE `guilds` SET `allowedspam` = JSON_UPDATE(allowedspam, '[\"test\"]')")
+    await inter.send("Успешно")
 
 
 @client.slash_command()
