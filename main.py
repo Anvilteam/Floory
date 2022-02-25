@@ -208,7 +208,7 @@ async def change_status():
 @client.slash_command()
 async def setup(inter: disnake.ApplicationCommandInteraction):
     #await cur("query", f"INSERT INTO guilds (guild) VALUES({inter.guild.id});")
-    await cur("query", "UPDATE `guilds` SET `allowedspam` = JSON_UPDATE(allowedspam, '[\"test\"]')")
+    await cur("query", "INSERT INTO `guilds` (allowedspam) VALUES ('a');")
     await inter.send("Успешно")
 
 
