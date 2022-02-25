@@ -121,6 +121,7 @@ async def on_guild_remove(guild: disnake.Guild):
 @client.event
 async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, error: commands.CheckFailure):
     locale = LangTool(inter.guild.id)
+    await locale.set()
     formatted = f"[{inter.guild.name}]|{error}"
     embed = disnake.Embed(title=locale["main.error"],
                           color=color_codes["error"])

@@ -63,7 +63,7 @@ class Moderation(commands.Cog):
             await member.timeout(duration=0)
             await inter.send(locale["moderation.unmute"].format(member=member, author=author))
 
-    @commands.cooldown()
+    @commands.cooldown(1, 90)
     @has_permissions('manage_messages', position_check=False)
     @commands.slash_command(description="очистка чата на указанное кол-во сообщений")
     async def clear(self, inter: disnake.ApplicationCommandInteraction, amount: int = 1):
