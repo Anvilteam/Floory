@@ -29,7 +29,7 @@ async def cur(_type, arg):
                     result = await cur.fetchall()
     pool.close()
     await pool.wait_closed()
-    if len(result) == 1:
+    if result is not None and len(result) == 1:
         result = result[0]
     if result is not None:
         return result
