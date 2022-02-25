@@ -34,16 +34,16 @@ logger.setLevel(logging.INFO)
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
 client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
-                      #test_guilds=test_guilds,
-                      #sync_commands_debug=True,
-                      #sync_permissions=True)
+# test_guilds=test_guilds,
+# sync_commands_debug=True,
+# sync_permissions=True)
 logger.info("Инициализация команд и событий..")
 
 
-def load_cache():
+async def load_cache():
     with Bar('Загрузка кэша', max=len(client.guilds)) as bar:
         for guild in client.guilds:
-            locale = cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {guild.id}")[0]
+            locale = await cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {guild.id}")
             redis_client.set(guild.id, locale)
             bar.next()
 
@@ -56,7 +56,7 @@ async def on_ready():
             client.load_extension(f'cogs.{filename[:-3]}')
             logger.info(f"Ког {filename} загружен")
     logger.info("Начало загрузки кэша")
-    load_cache()
+    await load_cache()
     await change_status.start()
     logger.info("Бот загружен!")
 
@@ -64,45 +64,56 @@ async def on_ready():
 @client.event
 async def on_message(message: disnake.Message):
     author = message.author
-    antispam = cur("fetch", f"SELECT `antispam` FROM `guilds` WHERE `guild` = {message.guild.id}")[0]
+    antispam = await cur("fetch", f"SELECT `antispam` FROM `guilds` WHERE `guild` = {message.guild.id}")
 
     if author.guild_permissions.administrator:
         return
 
-    def spam_check(msg: disnake.Message):
-        return msg.author == msg.author and (datetime.now(timezone.utc) - msg.created_at).seconds < 15
-
-    if antispam == 'true':
-        result = len(list(filter(lambda m: spam_check(m), client.cached_messages)))
-        if 8 <= result < 12:
-            await message.channel.send(content=message.author.mention)
-
-    logging_ = cur("fetch", f"SELECT `logging` FROM `guilds` WHERE `guild` = {message.guild.id}")[0]
+    logging_ = await cur("fetch", f"SELECT `logging` FROM `guilds` WHERE `guild` = {message.guild.id}")
     if logging_ == 'true':
-        log_channel = cur("fetch", f"SELECT `logs-channel` FROM `guilds` WHERE `guild` = {message.guild.id}")[0]
+        log_channel = await cur("fetch", f"SELECT `logs-channel` FROM `guilds` WHERE `guild` = {message.guild.id}")
+
+    def spam_check(msg: disnake.Message):
+        return message.author == msg.author and (datetime.now(timezone.utc) - msg.created_at).seconds < 15
+
+    if antispam != 0:
+        result = len(list(filter(lambda m: spam_check(m), client.cached_messages)))
+        if 10 <= result:
+            locale = LangTool(message.guild.id)
+            await locale.set()
+            match antispam:
+                case 1:
+                    await author.timeout(duration=300, reason="Spam")
+                case 2:
+                    pass
+                case 3:
+                    pass
+            await message.channel.send(content=message.author.mention)
 
 
 @client.event
 async def on_guild_join(guild: disnake.Guild):
-    cur("query", f"INSERT INTO guilds (guild) VALUES({guild.id});")
+    await cur("query", f"INSERT INTO guilds (guild) VALUES({guild.id});")
     channel = guild.system_channel
     locale = LangTool(guild.id)
+    await locale.set()
+
+    embed = disnake.Embed(title=locale["main.inviting_title"],
+                          description=locale["main.inviting_description"],
+                          color=color_codes['default'])
+    embed.add_field(name=locale["main.faq1Q"], value=locale["main.faq1A"])
+    embed.add_field(name=locale["main.faq2Q"], value=locale["main.faq2A"], inline=False)
+    embed.add_field(name=locale["main.faq3Q"], value=locale["main.faq3A"], inline=False)
     if channel is not None:
-        embed = disnake.Embed(title=locale["main.inviting_title"],
-                              description=locale["main.inviting_description"],
-                              color=color_codes['default'])
-        embed.add_field(name=locale["main.faq1Q"], value=locale["main.faq1A"])
-        embed.add_field(name=locale["main.faq2Q"], value=locale["main.faq2A"], inline=False)
-        embed.add_field(name=locale["main.faq3Q"], value=locale["main.faq3A"], inline=False)
         await channel.send(embed=embed, view=core.views.SupportServer())
 
 
 @client.event
 async def on_guild_remove(guild: disnake.Guild):
-    cur("query", f"DELETE FROM `guilds` WHERE `guild` = {guild.id};")
+    await cur("query", f"DELETE FROM `guilds` WHERE `guild` = {guild.id};")
 
 
-"""@client.event
+@client.event
 async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, error: commands.CheckFailure):
     locale = LangTool(inter.guild.id)
     formatted = f"[{inter.guild.name}]|{error}"
@@ -124,7 +135,7 @@ async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, e
                               color=color_codes["error"])
         embed.add_field(name=f"```NotEnoughPerms```",
                         value=locale["exceptions.NotEnoughPerms"])
-        embed.add_field(name="Права", value=embed_value)
+        embed.add_field(name="> Необходимые права", value=embed_value)
 
     elif isinstance(error, MemberHigherPermissions):
         embed = disnake.Embed(title=locale["main.error"],
@@ -134,7 +145,7 @@ async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, e
 
     embed.set_thumbnail(file=disnake.File("logo.png"))
     await inter.send(embed=embed, view=core.views.SupportServer())
-    logger.error(formatted)"""
+    logger.error(formatted)
 
 
 @client.event
@@ -167,6 +178,7 @@ async def on_button_click(inter: disnake.MessageInteraction):
                 await inter.send("а фиг тебе")
         case 'close_vote':
             locale = LangTool(inter.guild.id)
+            await locale.set()
             msg = inter.message
             embed = msg.embeds[0]
             fields = embed.fields
@@ -259,8 +271,7 @@ async def help(inter: disnake.ApplicationCommandInteraction,
 
 
 @client.slash_command(description="пинг бота")
-async def ping(inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
-    print(member.public_flags.spammer)
+async def ping(inter: disnake.ApplicationCommandInteraction):
     ping = client.latency
     await inter.response.send_message(f'Pong! {ping * 1000:.0f} ms')
 

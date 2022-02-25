@@ -39,12 +39,13 @@ class Settings(commands.Cog):
     @settings.sub_command()
     async def language(self, inter: disnake.ApplicationCommandInteraction,
                        locale: str = Param(autocomplete=autocomplete_locales)):
-        lang = LangTool(inter.guild.id)
+        locale = LangTool(inter.guild.id)
+        await locale.set()
         if locale in locales:
-            cur("query", f"UPDATE `guilds` SET `locale` = '{locale}' WHERE `guild` = {inter.guild.id}")
-            await inter.send(lang["settings.set_locale"].format(locale))
+            await cur("query", f"UPDATE `guilds` SET `locale` = '{locale}' WHERE `guild` = {inter.guild.id}")
+            await inter.send(locale["settings.set_locale"].format(locale))
         else:
-            await inter.send(lang["settings.invalid_locale"])
+            await inter.send(locale["settings.invalid_locale"])
 
     @commands.cooldown(1, 200)
     @settings.sub_command()
@@ -55,6 +56,7 @@ class Settings(commands.Cog):
         if channel is None:
             channel = inter.channel
         locale = LangTool(inter.guild.id)
+        await locale.set()
         if status == "on":
             webhooks = await inter.guild.webhooks()
             is_created, news = core.tools.news_status(webhooks)
@@ -82,6 +84,7 @@ class Settings(commands.Cog):
     async def set_news_channel(self, inter: disnake.ApplicationCommandInteraction,
                                channel: disnake.TextChannel = Param(description="канал куда будут поступать новости")):
         locale = LangTool(inter.guild.id)
+        await locale.set()
         webhooks = await inter.guild.webhooks()
         is_created, news = core.tools.news_status(webhooks)
         if not is_created:

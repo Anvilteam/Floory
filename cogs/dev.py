@@ -50,7 +50,7 @@ class Dev(commands.Cog):
         if footer is not None:
             embed.set_footer(text=footer)
         for guild in self.client.guilds:
-            news_channel = cur("fetch", f"SELECT `news-channel` FROM `guilds` WHERE guild = {guild.id}")[0]
+            news_channel = await cur("fetch", f"SELECT `news-channel` FROM `guilds` WHERE guild = {guild.id}")[0]
             if news_channel is not None:
                 print(news_channel)
                 channel = disnake.utils.get(guild.text_channels, id=news_channel)

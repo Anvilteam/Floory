@@ -17,6 +17,7 @@ class Utils(commands.Cog):
     @utils.sub_command(description="получение информации о пользователе")
     async def member(self, inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
         locale = LangTool(inter.guild.id)
+        await locale.set()
         guild_owner = inter.guild.owner
         name = member.name
         created_at = member.created_at.strftime('%Y.%m.%d %H:%M:%S')
@@ -43,6 +44,7 @@ class Utils(commands.Cog):
     @utils.sub_command(description="информация о сервере")
     async def server(self, inter: disnake.ApplicationCommandInteraction):
         locale = LangTool(inter.guild.id)
+        await locale.set()
         guild = inter.guild
         name = guild.name
         members = len(guild.members)
@@ -80,14 +82,15 @@ class Utils(commands.Cog):
     @utils.sub_command(description="получение прав конкретного пользователя")
     async def permissions(self, inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
         emojies = {0: '❌', 1: '✅'}
-        lang = LangTool(inter.guild.id)
+        locale = LangTool(inter.guild.id)
+        await locale.set()
         member_perms = perms_to_dict(member.guild_permissions)
         # '❌|✅', 'permission translate', 'new line'
         embed_value = "".join(
-            [f"{emojies[member_perms[perm]]} {lang[f'permissions.{perm}']}\n" for perm in member_perms])
-        embed = disnake.Embed(title=lang["utils.members_permissions"].format(member=member),
+            [f"{emojies[member_perms[perm]]} {locale[f'permissions.{perm}']}\n" for perm in member_perms])
+        embed = disnake.Embed(title=locale["utils.members_permissions"].format(member=member),
                               color=0x3ef0a9)
-        embed.add_field(name=lang["utils.perms_list"], value=embed_value)
+        embed.add_field(name=locale["utils.perms_list"], value=embed_value)
         await inter.send(embed=embed, delete_after=30.0)
 
     @utils.sub_command(description="получение аватара пользователя")
@@ -105,6 +108,7 @@ class Utils(commands.Cog):
                      image: disnake.Attachment = Param(default=None, description="картинка (по желанию)"),
                      variants: str = Param(default="варианты для голосование (через '|')")):
         locale = LangTool(inter.guild.id)
+        await locale.set()
         view = disnake.ui.View()
         embed = disnake.Embed(title=title, description=description)
         vars = variants.split('|')
