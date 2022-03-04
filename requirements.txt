@@ -3,3 +3,4 @@ PyYAML==6.0
 aiomysql==0.0.22
 redis==4.1.2
 progress==1.6
+loguru==0.6.0

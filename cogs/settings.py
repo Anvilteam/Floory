@@ -35,8 +35,8 @@ class Settings(commands.Cog):
             locale = LangTool(inter.guild.id)
             await inter.send(locale["exceptions.NotGuildOwner"])
 
-    @commands.cooldown(1, 360)
-    @settings.sub_command()
+    @commands.cooldown(1, 360, commands.BucketType.guild)
+    @settings.sub_command(description="установить язык бота")
     async def language(self, inter: disnake.ApplicationCommandInteraction,
                        locale: str = Param(autocomplete=autocomplete_locales)):
         locale = LangTool(inter.guild.id)
@@ -47,8 +47,8 @@ class Settings(commands.Cog):
         else:
             await inter.send(locale["settings.invalid_locale"])
 
-    @commands.cooldown(1, 200)
-    @settings.sub_command()
+    @commands.cooldown(1, 200, commands.BucketType.guild)
+    @settings.sub_command(description="включить/отключить новости бота")
     async def news(self, inter: disnake.ApplicationCommandInteraction,
                    status: str = Param(autocomplete=autocomplete_statuses),
                    channel: disnake.TextChannel = Param(default=None,
@@ -79,8 +79,8 @@ class Settings(commands.Cog):
         else:
             await inter.send(locale["settings.invalid_arg"])
 
-    @commands.cooldown(1, 360)
-    @settings.sub_command()
+    @commands.cooldown(1, 120, commands.BucketType.guild)
+    @settings.sub_command(description="изменить канал для новостей")
     async def set_news_channel(self, inter: disnake.ApplicationCommandInteraction,
                                channel: disnake.TextChannel = Param(description="канал куда будут поступать новости")):
         locale = LangTool(inter.guild.id)

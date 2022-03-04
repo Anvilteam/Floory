@@ -2,16 +2,16 @@ import disnake
 import random
 import os
 import yaml
-import logging
 import core
 import core.views
-from datetime import datetime, timezone
+import sys
 from disnake.ext import commands, tasks
 from typing import List
 from core.database import redis_client, cur
 from core.exceptions import *
 from core.tools import LangTool, color_codes
 from progress.bar import Bar
+from loguru import logger
 
 test_guilds = [737351356079145002,  # FallenSky
                906795717643882496  # FlooryHome
@@ -24,12 +24,11 @@ async def autocomplete_categories(inter, string: str) -> List[str]:
 
 
 # Настройки логирования
-logging.basicConfig(
-    format='[%(asctime)s][%(levelname)s][%(name)s]: %(message)s',
-    level=logging.INFO)
-
-logger = logging.getLogger('floorybot')
-logger.setLevel(logging.INFO)
+logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO",
+           enqueue=True,
+           backtrace=True,
+           diagnose=True)
+logger.add("logs/floory_{time}.log", enqueue=True)
 
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
@@ -37,7 +36,7 @@ client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Inten
 # test_guilds=test_guilds,
 # sync_commands_debug=True,
 # sync_permissions=True)
-logger.info("Инициализация команд и событий..")
+logger.info("Запуск disnake..")
 
 
 async def load_cache():
@@ -56,49 +55,16 @@ async def on_ready():
             client.load_extension(f'cogs.{filename[:-3]}')
             logger.info(f"Ког {filename} загружен")
     logger.info("Начало загрузки кэша")
+    await core.database.connect()
     await load_cache()
     await change_status.start()
     logger.info("Бот загружен!")
 
 
 @client.event
-async def on_message(message: disnake.Message):
-    author = message.author
-    antispam = await cur("fetch", f"SELECT `antispam` FROM `guilds` WHERE `guild` = {message.guild.id}")
-    allowedSpam = await cur("fetch", f"SELECT `allowedspam` FROM `guilds` WHERE `guild` = {message.guild.id}")
-    print(allowedSpam)
-    print(type(allowedSpam))
-
-    if author.guild_permissions.administrator:
-        return
-    if message.channel in allowedSpam:
-        return
-
-    logging_ = await cur("fetch", f"SELECT `logging` FROM `guilds` WHERE `guild` = {message.guild.id}")
-    if logging_ == 'true':
-        log_channel = await cur("fetch", f"SELECT `logs-channel` FROM `guilds` WHERE `guild` = {message.guild.id}")
-
-    def spam_check(msg: disnake.Message):
-        return message.author == msg.author and (datetime.now(timezone.utc) - msg.created_at).seconds < 15
-
-    if antispam != 0:
-        result = len(list(filter(lambda m: spam_check(m), client.cached_messages)))
-        if 10 <= result:
-            locale = LangTool(message.guild.id)
-            await locale.set()
-            match antispam:
-                case 1:
-                    await author.timeout(duration=300, reason="Spam")
-                case 2:
-                    pass
-                case 3:
-                    pass
-            await message.channel.send(content=message.author.mention)
-
-
-@client.event
 async def on_guild_join(guild: disnake.Guild):
     await cur("query", f"INSERT INTO guilds (guild) VALUES({guild.id});")
+    logger.info(f"Новая гильдия! {guild.name}-{guild.id}")
     channel = guild.system_channel
     locale = LangTool(guild.id)
     await locale.set()
@@ -116,6 +82,7 @@ async def on_guild_join(guild: disnake.Guild):
 @client.event
 async def on_guild_remove(guild: disnake.Guild):
     await cur("query", f"DELETE FROM `guilds` WHERE `guild` = {guild.id};")
+    logger.info(f"Бот покидает гильдию {guild.name}-{guild.id}")
 
 
 @client.event
@@ -148,89 +115,86 @@ async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, e
                               color=color_codes["error"])
         embed.add_field(name=f"```MemberHigherPermissions```",
                         value=locale["exceptions.MemberHigherPermissions"])
+    else:
+        logger.error("-----------------Неизвестная ошибка!----------------")
+        logger.error(formatted)
+        logger.error(f"Гильдия {inter.guild}, пользователь {inter.author}")
+        logger.error("----------------------------------------------------")
 
     embed.set_thumbnail(file=disnake.File("logo.png"))
+    embed.set_footer(text=locale["exceptions.unknown"])
     await inter.send(embed=embed, view=core.views.SupportServer())
-    logger.error(formatted)
 
 
 @client.event
 async def on_button_click(inter: disnake.MessageInteraction):
+    locale = LangTool(inter.guild.id)
+    await locale.set()
     match inter.component.custom_id.split('-')[0]:
         case 'voting':
             msg = inter.message
             embed = msg.embeds[0]
             fields = embed.fields
             button: disnake.ui.Button = inter.component
+            # Разделям название варианта и кол-во проголосовавших
             label, counter = button.label.split('|')
+
+            # Проверяем проголосовал ли юзер или нет
             votes = ''
+            variants = []
             for f in fields:
+                variants.append(f.name)
                 votes += f.value
-            fields_names = [f.name for f in fields]
-            chosen_index = fields_names.index(label)
+
+            # Получаем индекс элемента за который проголосовали
+            chosen_index = variants.index(label)
             field = fields[chosen_index]
+
             logger.info(label)
             if inter.author.mention not in votes:
+                # Прибавляем 1 к счетчику на кнопке
                 button.label = label + f'|{int(counter) + 1}'
-                msg_components: list[disnake.ui.ActionRow] = msg.components
-                button_list = msg_components[0].children
+                # Обновляем кнопку
+                button_list = msg.components[0].children
                 button_list[chosen_index] = button
-                action_row = disnake.ui.ActionRow()
+                new_btn_list = []
                 for btn in button_list:
-                    action_row.add_button(label=btn.label, custom_id=btn.custom_id, style=btn.style)
+                    new_btn_list.append(disnake.ui.Button.from_component(btn))
                 embed.set_field_at(chosen_index, name=field.name, value=field.value + f'\n{inter.author.mention}')
-                await inter.response.edit_message(embed=embed, components=[action_row])
+                await inter.response.edit_message(embed=embed, components=new_btn_list)
             else:
-                await inter.send("а фиг тебе")
+                await inter.send(locale["utils.alreadyVoted"], ephemeral=True)
         case 'close_vote':
-            locale = LangTool(inter.guild.id)
-            await locale.set()
-            msg = inter.message
-            embed = msg.embeds[0]
-            fields = embed.fields
-            fields_names = [f.name for f in fields]
-            msg_components: list[disnake.ui.ActionRow] = msg.components
-            button_list = msg_components[0].children
-            btns_counter = [button.label.split('|')[1] for button in button_list if
-                            button.style != disnake.ButtonStyle.red]
-            for i in range(len(fields_names)):
-                embed.set_field_at(i, name=fields_names[i], value=btns_counter[i])
-            await inter.response.edit_message(content=locale['utils.votingEnd'], embed=embed, components=[])
+            if inter.author.guild_permissions.manage_messages:
+                locale = LangTool(inter.guild.id)
+                await locale.set()
+                msg = inter.message
+                embed = msg.embeds[0]
+                fields = embed.fields
+                fields_names = [f.name for f in fields]
+                button_list = msg.components[0].children
+                btns_counter = [button.label.split('|')[1] for button in button_list if
+                                button.style != disnake.ButtonStyle.red]
+                for i in range(len(fields_names)):
+                    embed.set_field_at(i, name=fields_names[i], value=btns_counter[i])
+                await inter.response.edit_message(content=locale['utils.votingEnd'], embed=embed, components=[])
+            else:
+                await inter.send(locale["utils.nep"], ephemeral=True)
 
 
-@tasks.loop(seconds=120.0)
+@tasks.loop(seconds=300.0)
 async def change_status():
-    """Каждые 60 секунд меняет статус"""
+    """Каждые 5 минут меняет статус"""
     current_status = random.choice(cfg["bot"]["splashes"])
-    await client.change_presence(activity=disnake.Activity(name=current_status, type=disnake.ActivityType.playing))
+    await client.change_presence(activity=disnake.Game(name=current_status, type=disnake.ActivityType.watching))
 
 
-@client.slash_command()
-async def setup(inter: disnake.ApplicationCommandInteraction):
-    await cur("query", f"INSERT INTO guilds (guild) VALUES({inter.guild.id});")
-    await cur("query", "INSERT INTO `guilds` (allowedspam) VALUES ('a');")
-    await inter.send("Успешно")
-
-
-@client.slash_command()
-async def about(inter: disnake.ApplicationCommandInteraction):
-    embed = disnake.Embed(title="О боте")
-    embed.add_field("Что такое FlooryBot?",
-                    value="FlooryBot был придуман как open-source альтернатива другим бота для дискорда.\n"
-                          "Бот содержит стандартные функции модерации, утилит и других полезных команд.\n"
-                          "Стоит сказать, что состоит только из слэш команд, это необходимо для обеспечения меньшего кол-ва ошибок"
-                          "в связи с человеческим фактором.\n"
-                          "Если Вы хотите помочь в разработке или просто посмотреть на бота изнутри то ссылка на Github ниже")
-    embed.add_field(name="Github", value="||https://github.com/Anvilteam/Floory||", inline=False)
-    embed.add_field("P.S.", value="FlooryBot является дочерним проектом AnvilDev", inline=False)
-    embed.set_thumbnail(file=disnake.File("logo.png"))
-    await inter.send(embed=embed)
-
-
+@commands.cooldown(1, 180, commands.BucketType.member)
 @client.slash_command(description="состояние бота")
 async def status(inter: disnake.ApplicationCommandInteraction):
     splash = random.choice(cfg["bot"]["status_splashes"])
     locale = LangTool(inter.guild.id)
+    await locale.set()
     ping = client.latency
     guilds = len(client.guilds)
     cmds = len(client.slash_commands)
@@ -248,6 +212,7 @@ async def status(inter: disnake.ApplicationCommandInteraction):
     await inter.send(embed=embed, view=core.views.SupportServer())
 
 
+@commands.cooldown(1, 600, commands.BucketType.member)
 @client.slash_command(description="предложить идею для бота")
 async def idea(inter: disnake.ApplicationCommandInteraction,
                title: str = commands.Param(description="Название идеи"),
@@ -263,6 +228,7 @@ async def idea(inter: disnake.ApplicationCommandInteraction,
     await inter.send("Ваша идея была успешно предложена")
 
 
+@commands.cooldown(1, 600, commands.BucketType.member)
 @client.slash_command(description="сообщить о баге/ошибке в боте")
 async def bug(inter: disnake.ApplicationCommandInteraction,
               bug_name: str = commands.Param(description="Название бага"),
@@ -277,16 +243,35 @@ async def bug(inter: disnake.ApplicationCommandInteraction,
 
 
 @client.slash_command(description="список команд бота")
-async def help(inter: disnake.ApplicationCommandInteraction,
-               category: str = commands.Param(default=None, description='категория',
-                                              autocomplete=autocomplete_categories)):
-    embed = disnake.Embed(title="Help")
+async def help(inter: disnake.ApplicationCommandInteraction):
+    embed = disnake.Embed(title="📗 Help",
+                          description="Здесь приведена `самая главная информация` о системе команд\n"
+                                      "\n"
+                                      "Единственное что надо запомнить, что у каждой категории команд есть свой префикс"
+                                      " без которого Вы не сможете использовать команду, *его надо прописывать "
+                                      "обязательно.*\n"
+                                      "\n"
+                                      "Здесь будут кратко описаны категории и их префиксы т.к. описание самих команд "
+                                      "Вы увидете когда будете их писать.")
+    embed.add_field(name="🛡 Модерация",
+                    value="> Обычные команды модерации, не более\nПрефикс - `moderation`")
+    embed.add_field(name="⚙ Настройки",
+                    value="> Настройки бота\nПрефикс - `settings`",
+                    inline=False)
+    embed.add_field(name="🔎 Утилиты",
+                    value="> Различные полезные инструменты\nПрефикс - `utils`",
+                    inline=False)
+    embed.add_field(name="🎮 Веселости",
+                    value="> Различные мини-игры и другие штучки\nПрефикс - `fun`",
+                    inline=False)
+    await inter.send(embed=embed)
 
 
+@commands.cooldown(1, 45, commands.BucketType.member)
 @client.slash_command(description="пинг бота")
 async def ping(inter: disnake.ApplicationCommandInteraction):
-    ping = client.latency
-    await inter.response.send_message(f'Pong! {ping * 1000:.0f} ms')
+    latency = client.latency
+    await inter.response.send_message(f'Pong! {latency * 1000:.0f} ms')
 
 
 client.run(cfg["bot"]["token"])

@@ -4,6 +4,7 @@ import random
 import yaml
 from disnake.ext import commands
 from core.tools import LangTool
+from loguru import logger
 
 emojis = {1: 946031293655842856,
           2: 946031736196829195,
@@ -19,18 +20,19 @@ class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    @commands.cooldown(1, 25, commands.BucketType.member)
     @commands.slash_command()
     async def fun(self, inter):
+        logger.info("Команда fun")
         pass
 
     @fun.sub_command(description="подбросить монетку")
-    @commands.cooldown(1, 25)
     async def coin(self, inter: disnake.ApplicationCommandInteraction):
         locale = LangTool(inter.guild.id)
         await locale.set()
         variants = ['орел', 'решка']
         coin_choice = random.choice(variants)
-        await inter.response.send_message(locale["games.toss"])
+        await inter.response.send_message(locale["fun.toss"])
         await asyncio.sleep(1)
         if coin_choice == "орел":
             await inter.edit_original_message(content=locale["fun.eagleWin"])
@@ -44,7 +46,7 @@ class Fun(commands.Cog):
         await locale.set()
         waiting = 0.5
 
-        if amount < 3:
+        if amount < 6:
             await inter.send(locale["fun.tossingCubes"])
             for i in range(7):
                 msg = ''
@@ -54,19 +56,6 @@ class Fun(commands.Cog):
                 await inter.edit_original_message(content=msg)
                 await asyncio.sleep(waiting)
                 waiting += 0.01
-        elif 2 < amount < 10:
-            if inter.guild.id != 906795717643882496:
-                await inter.send(locale["fun.notHome"])
-            else:
-                await inter.send(locale["fun.tossingCubes"])
-                for i in range(7):
-                    msg = ''
-                    for j in range(amount):
-                        cube = random.randint(1, 6)
-                        msg += f"<:die_{cube}:{emojis[cube]}> "
-                    await inter.edit_original_message(content=msg)
-                    await asyncio.sleep(waiting)
-                    waiting += 0.01
         else:
             await inter.send(locale["fun.tmCubes"])
 

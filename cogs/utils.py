@@ -14,8 +14,10 @@ class Utils(commands.Cog):
     async def utils(self, inter):
         pass
 
+    @commands.cooldown(1, 45, commands.BucketType.member)
     @utils.sub_command(description="получение информации о пользователе")
-    async def member(self, inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
+    async def member(self, inter: disnake.ApplicationCommandInteraction,
+                     member: disnake.Member = commands.Param(description='пользователь')):
         locale = LangTool(inter.guild.id)
         await locale.set()
         guild_owner = inter.guild.owner
@@ -41,23 +43,22 @@ class Utils(commands.Cog):
                         value=is_owner, inline=False)
         await inter.send(embed=embed, delete_after=30.0)
 
+    @commands.cooldown(1, 45, commands.BucketType.member)
     @utils.sub_command(description="информация о сервере")
     async def server(self, inter: disnake.ApplicationCommandInteraction):
         locale = LangTool(inter.guild.id)
         await locale.set()
         guild = inter.guild
-        name = guild.name
-        members = len(guild.members)
         icon = guild.icon
         owner = guild.owner
 
-        def online(member=guild.members):
+        def online(member):
             return member.status != disnake.Status.offline and not member.bot
 
         members_list = list(filter(online, guild.members))
         online_list = len(members_list)
 
-        def members(member=guild.members):
+        def members(member):
             return member and not member.bot
 
         users_list = list(filter(members, guild.members))
@@ -75,12 +76,14 @@ class Utils(commands.Cog):
         if icon is None:
             embed.set_thumbnail(file=disnake.File("logo.png"))
         else:
-            embed.set_thumbnail(url=str(icon))
+            embed.set_thumbnail(url=icon.url)
         await inter.send(embed=embed, delete_after=30.0)
 
+    @commands.cooldown(1, 45, commands.BucketType.member)
     @has_permissions("manage_roles", position_check=False)
     @utils.sub_command(description="получение прав конкретного пользователя")
-    async def permissions(self, inter: disnake.ApplicationCommandInteraction, member: disnake.Member):
+    async def permissions(self, inter: disnake.ApplicationCommandInteraction,
+                          member: disnake.Member = commands.Param(description='пользователь')):
         emojies = {0: '❌', 1: '✅'}
         locale = LangTool(inter.guild.id)
         await locale.set()
@@ -93,26 +96,28 @@ class Utils(commands.Cog):
         embed.add_field(name=locale["utils.perms_list"], value=embed_value)
         await inter.send(embed=embed, delete_after=30.0)
 
+    @commands.cooldown(1, 45, commands.BucketType.member)
     @utils.sub_command(description="получение аватара пользователя")
     async def avatar(self, inter: disnake.ApplicationCommandInteraction,
-                     member: disnake.Member):
+                     member: disnake.Member = commands.Param(description='пользователь')):
         embed = disnake.Embed(title=member, color=0x3ef0a9)
         embed.set_image(url=member.display_avatar.url)
         await inter.response.send_message(embed=embed)
 
+    @commands.cooldown(1, 270, commands.BucketType.member)
     @has_permissions("administrator", position_check=False)
     @utils.sub_command(description="сделать голосование")
     async def voting(self, inter: disnake.ApplicationCommandInteraction,
                      title: str = Param(description="название голосования"),
                      description: str = Param(description="описание голосования"),
                      image: disnake.Attachment = Param(default=None, description="картинка (по желанию)"),
-                     variants: str = Param(default="варианты для голосование (через '|')")):
+                     variants: str = Param(description="варианты для голосование (через '|')")):
         locale = LangTool(inter.guild.id)
         await locale.set()
         view = disnake.ui.View()
         embed = disnake.Embed(title=title, description=description)
         vars = variants.split('|')
-        if len(vars) < 5:
+        if len(vars) < 6:
             for var in vars:
                 embed.add_field(name=var, value='-----')
                 custom_id = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(int(4)))

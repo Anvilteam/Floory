@@ -10,9 +10,15 @@ bot:
     - "Test splash 2"
     - "Test splash 3"
 
+
+  status_splashes:
+    - "Test status splash 1"
+    - "Test status splash 2"
+    - "Test status splash 3"
+
 mysql:
   host: "127.0.0.1"
   user: "user"
-  port: 1234
+  port: 3306
   password: "password"
   database: "dbName"

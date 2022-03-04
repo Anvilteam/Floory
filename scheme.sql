@@ -3,6 +3,5 @@ CREATE TABLE `guilds` (
     `locale` VARCHAR(8) NOT NULL DEFAULT 'ru_RU',
     `logging` VARCHAR(8) NOT NULL DEFAULT 'false',
     `logs-channel` BIGINT NULL DEFAULT NULL,
-    `antispam` VARCHAR(8) NOT NULL DEFAULT 'false',
     PRIMARY KEY (`guild`)
 ) COLLATE='utf8mb4_0900_ai_ci';

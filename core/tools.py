@@ -1,10 +1,8 @@
 import json
-
 import disnake
-
 from core.exceptions import *
 from core.database import redis_client, cur
-from typing import List
+
 
 color_codes = {'default': 0x3ef0a9,
                'error': 0x3ef0a9}
@@ -17,7 +15,7 @@ class LangTool:
         self._locale = None
         self.guild_id = guild_id
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> str:
         category, frase = key.split(".")
         with open(f"locales/{self._locale}/{category}.json", "r", encoding='UTF-8') as f:
             data = json.load(f)

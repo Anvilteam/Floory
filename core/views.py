@@ -6,7 +6,7 @@ class Idea(disnake.ui.View):
     def __init__(self):
         super().__init__()
 
-    @disnake.ui.button(label="Поддерживаю", emoji='⭐', style=disnake.ButtonStyle.grey, custom_id='idea')
+    @disnake.ui.button(label="Поддерживаю", emoji='⭐', style=disnake.ButtonStyle.grey)
     async def support(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         embed = inter.message.embeds[0]
         desc = embed.fields[0]
@@ -24,7 +24,7 @@ class CloseBugTicket(disnake.ui.View):
     def __init__(self):
         super().__init__()
 
-    @disnake.ui.button(label="Закрыть обсуждение", emoji='❌', style=disnake.ButtonStyle.grey, custom_id='bug')
+    @disnake.ui.button(label="Закрыть обсуждение", emoji='❌', style=disnake.ButtonStyle.grey)
     async def close(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         if inter.author.id in core.tools.developers:
             await inter.response.defer()
@@ -36,4 +36,5 @@ class CloseBugTicket(disnake.ui.View):
 class SupportServer(disnake.ui.View):
     def __init__(self):
         super().__init__()
-        self.add_item(disnake.ui.Button(label="Сервер бота", url="https://discord.gg/3KG3ue66rY"))
+        self.add_item(disnake.ui.Button(label="Сервер поддержки", url="https://discord.gg/3KG3ue66rY"))
+
