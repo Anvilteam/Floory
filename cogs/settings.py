@@ -4,7 +4,7 @@ from disnake.ext.commands import Param
 
 import core.tools
 from core.tools import LangTool, is_guild_owner, has_permissions
-from core.database import cur
+from core.database import cur, redis_client
 from core.exceptions import *
 from typing import List
 
@@ -43,6 +43,7 @@ class Settings(commands.Cog):
         await locale_.set()
         if locale in locales:
             await cur("query", f"UPDATE `guilds` SET `locale` = '{locale}' WHERE `guild` = {inter.guild.id}")
+            await redis_client.set(inter.guild.id, locale)
             await inter.send(locale_["settings.set_locale"].format(locale))
         else:
             await inter.send(locale_["settings.invalid_locale"])
