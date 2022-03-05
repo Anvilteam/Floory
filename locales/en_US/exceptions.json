@@ -1,0 +1,7 @@
+{"error": "The error has occurred!",
+ "unknown": "If there's no information about the error, please, contact a developer for help",
+ "MemberHigherPermissions": "Member's permissions are higher or are same with yours",
+ "NotEnoughPerms": "You don't have enough permissions for this command!",
+ "NotGuildOwner": "You're not an owner of this server",
+ "CommandOnCooldown": "You need to wait till using this command again: {time}",
+ "Forbidden": "Bot don't have enough permissions for this!"}

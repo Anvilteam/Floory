@@ -1,0 +1,9 @@
+{"reasonIsNone": "Without a reason",
+ "kick": "{author} has kicked {member} for a reason: {reason}",
+ "ban": "{author} has banned {member} for a reason: {reason}",
+ "unban": "{author} has unbanned {member} for a reason: {reason}",
+ "clear": "Chat has been successfully cleared for {amount} messages/message",
+ "mute": "{author} has muted {member} for a reason: {reason}",
+ "unmute": "{author} has unmuted {member}",
+
+ "tmm": "Too many messages! (Maximum 250)"}

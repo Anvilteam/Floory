@@ -9,7 +9,7 @@ from core.exceptions import *
 from typing import List
 
 modules_status = ["on", "off"]
-locales = ["ru_RU"]
+locales = ["ru_RU", "en_US"]
 
 
 async def autocomplete_statuses(inter, string: str) -> List[str]:

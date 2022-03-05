@@ -1,0 +1,18 @@
+{"guild": "Server",
+ "error": "An error has occurred!",
+ "true":  "Yes",
+ "false":  "No",
+ "second": "Sec.",
+ "inviting_title": "Thank you for inviting Floory",
+ "inviting_description": "A list of commands is available in /help\nFrequently asked questions",
+ "faq1Q": "Why are slash commands unavailable?",
+ "faq1A":"They are usually added within an hour, if not, it may be a discord problem.",
+ "faq2Q": "Why exactly the slash commands?",
+ "faq2A": "Slash commands gives more control above the command by itself, and gives an easy interact interface",
+ "faq3Q": "I have an idea/I've found a bug. How do I report it to a developer? ",
+ "faq3A": "For this exists /idea and /bug commands. Please, don't spam with this command, and don't use it to chat with the developer!",
+
+ "guilds": "Quantity of the servers",
+ "cmds": "Quantity of commands",
+ "users": "Quantity of members",
+ "owners": "Creators"}
