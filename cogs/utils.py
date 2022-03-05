@@ -132,6 +132,18 @@ class Utils(commands.Cog):
         else:
             await inter.send(locale['utils.tmButtons'])
 
+    @commands.cooldown(1, 90, commands.BucketType.member)
+    @utils.sub_command(description="получить id всех эмодзи данного сервера")
+    async def get_emojis(self, inter: disnake.ApplicationCommandInteraction):
+        emojis = inter.guild.emojis
+        formatted = ''
+        for e in emojis:
+            if e.animated:
+                formatted += f"<a:{e.name}:{e.id}> `{e.id}`\n"
+            else:
+                formatted += f"<:{e.name}:{e.id}> `{e.id}`\n"
+        await inter.send(formatted)
+
 
 def setup(client):
     client.add_cog(Utils(client))

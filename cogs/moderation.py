@@ -70,9 +70,14 @@ class Moderation(commands.Cog):
     @commands.slash_command(description="очистка чата на указанное кол-во сообщений")
     async def clear(self, inter: disnake.ApplicationCommandInteraction,
                     amount: int = commands.Param(default=1, description='кол-во сообщений')):
-        await inter.response.defer()
-        await inter.delete_original_message()
-        await inter.channel.purge(limit=amount)
+        if amount < 251:
+            await inter.response.defer()
+            await inter.delete_original_message()
+            await inter.channel.purge(limit=amount)
+        else:
+            locale = LangTool(inter.guild.id)
+            await locale.set()
+            await inter.send(locale["tmь"])
 
 
 def setup(client):

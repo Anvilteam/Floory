@@ -4,4 +4,6 @@
  "unban": "{author} разбанил {member} по причине: {reason}",
  "clear": "Чат был успешно очищен на {amount} сообщений/ие",
  "mute": "{author} замьютил {member} по причине: {reason}",
- "unmute": "{author} размьютил {member}"}
+ "unmute": "{author} размьютил {member}",
+
+ "tmm": "Слишком много сообщений! (Макс. 250)"}

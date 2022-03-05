@@ -86,10 +86,10 @@ async def on_guild_remove(guild: disnake.Guild):
 
 
 @client.event
-async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, error: commands.CheckFailure):
+async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, error):
     locale = LangTool(inter.guild.id)
     await locale.set()
-    formatted = f"[{inter.guild.name}]|{error}"
+    formatted = f"{error}|{error.__traceback__}"
     embed = disnake.Embed(title=locale["main.error"],
                           color=color_codes["error"])
     if isinstance(error, commands.CommandOnCooldown):
@@ -103,18 +103,16 @@ async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, e
         for perm in permissions:
             string = f"❌ {locale[f'permissions.{perm}']}\n"
             embed_value += string
-
-        embed = disnake.Embed(title=locale["main.error"],
-                              color=color_codes["error"])
         embed.add_field(name=f"```NotEnoughPerms```",
                         value=locale["exceptions.NotEnoughPerms"])
         embed.add_field(name="> Необходимые права", value=embed_value)
 
     elif isinstance(error, MemberHigherPermissions):
-        embed = disnake.Embed(title=locale["main.error"],
-                              color=color_codes["error"])
         embed.add_field(name=f"```MemberHigherPermissions```",
                         value=locale["exceptions.MemberHigherPermissions"])
+    elif isinstance(error, disnake.Forbidden):
+        embed.add_field(name=f"```Forbidden```",
+                        value=locale["exceptions.Forbidden"])
     else:
         logger.error("-----------------Неизвестная ошибка!----------------")
         logger.error(formatted)
@@ -195,19 +193,20 @@ async def status(inter: disnake.ApplicationCommandInteraction):
     splash = random.choice(cfg["bot"]["status_splashes"])
     locale = LangTool(inter.guild.id)
     await locale.set()
-    ping = client.latency
+    latency = client.latency
     guilds = len(client.guilds)
     cmds = len(client.slash_commands)
     users = len(client.users)
     embed = disnake.Embed(title="FlooryBot",
-                          description=f"```{ping * 1000:.0f} ms | {splash}```",
+                          description=f"```{latency * 1000:.0f} ms | {splash}```",
                           color=color_codes['default'])
     embed.add_field(name="🛡 " + locale["main.guilds"], value=f"```{guilds}```")
     embed.add_field(name="⚙ " + locale["main.cmds"], value=f"```{cmds}```", inline=False)
     embed.add_field(name="👥 " + locale["main.users"], value=f"```{users}```")
     embed.add_field(name="💻 " + locale["main.owners"], value=f"```Xemay#9586\nRedWolf#2007\nD3st0nλ#5637```",
                     inline=False)
-    embed.add_field(name="🎲 Version", value="```0.3 beta```")
+    embed.add_field(name="<:github:945683293666439198> Github", value="[Тык](https://github.com/Anvilteam/Floory)")
+    embed.add_field(name="🎲 Version", value="```0.3 beta```", inline=False)
     embed.set_thumbnail(file=disnake.File("logo.png"))
     await inter.send(embed=embed, view=core.views.SupportServer())
 
