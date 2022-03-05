@@ -111,11 +111,14 @@ class Utils(commands.Cog):
                      title: str = Param(description="название голосования"),
                      description: str = Param(description="описание голосования"),
                      image: disnake.Attachment = Param(default=None, description="картинка (по желанию)"),
-                     variants: str = Param(description="варианты для голосование (через '|')")):
+                     variants: str = Param(description="варианты для голосование (через '|')"),
+                     footer: str = Param(default=None, description="футер эмбда (надпись внизу)")):
         locale = LangTool(inter.guild.id)
         await locale.set()
         view = disnake.ui.View()
         embed = disnake.Embed(title=title, description=description)
+        if footer is not None:
+            embed.set_footer(text=footer)
         vars = variants.split('|')
         if len(vars) < 6:
             for var in vars:

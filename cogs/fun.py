@@ -23,7 +23,6 @@ class Fun(commands.Cog):
     @commands.cooldown(1, 25, commands.BucketType.member)
     @commands.slash_command()
     async def fun(self, inter):
-        logger.info("Команда fun")
         pass
 
     @fun.sub_command(description="подбросить монетку")
@@ -66,8 +65,12 @@ class Fun(commands.Cog):
         await locale.set()
         variant = ['main.true', 'main.false', 'fun.maybe']
         result = random.choice(variant)
-        await inter.send(f"{inter.author} {locale['fun.asks']} {query} \n"
-                         f"{locale['fun.answer']} {locale[result]}")
+        embed = disnake.Embed(title=f"🔮 - {locale['fun.mystic_ball']}",
+                              description=f"{inter.author} **{locale['fun.asks']}** {query}",
+                              color=0x8614a3)
+        embed.add_field(name=locale['fun.answer'],
+                        value=locale[result])
+        await inter.send(embed=embed)
 
 
 def setup(client):

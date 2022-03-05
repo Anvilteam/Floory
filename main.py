@@ -241,6 +241,7 @@ async def bug(inter: disnake.ApplicationCommandInteraction,
     await inter.send("Баг был успешно отправлен", ephemeral=True)
 
 
+@commands.cooldown(1, 60, commands.BucketType.member)
 @client.slash_command(description="список команд бота")
 async def help(inter: disnake.ApplicationCommandInteraction):
     embed = disnake.Embed(title="📗 Help",
