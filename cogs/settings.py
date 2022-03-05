@@ -39,13 +39,13 @@ class Settings(commands.Cog):
     @settings.sub_command(description="установить язык бота")
     async def language(self, inter: disnake.ApplicationCommandInteraction,
                        locale: str = Param(autocomplete=autocomplete_locales)):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        locale_ = LangTool(inter.guild.id)
+        await locale_.set()
         if locale in locales:
             await cur("query", f"UPDATE `guilds` SET `locale` = '{locale}' WHERE `guild` = {inter.guild.id}")
-            await inter.send(locale["settings.set_locale"].format(locale))
+            await inter.send(locale_["settings.set_locale"].format(locale_))
         else:
-            await inter.send(locale["settings.invalid_locale"])
+            await inter.send(locale_["settings.invalid_locale"])
 
     @commands.cooldown(1, 200, commands.BucketType.guild)
     @settings.sub_command(description="включить/отключить новости бота")
