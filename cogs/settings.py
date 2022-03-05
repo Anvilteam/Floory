@@ -43,7 +43,7 @@ class Settings(commands.Cog):
         await locale_.set()
         if locale in locales:
             await cur("query", f"UPDATE `guilds` SET `locale` = '{locale}' WHERE `guild` = {inter.guild.id}")
-            await inter.send(locale_["settings.set_locale"].format(locale_))
+            await inter.send(locale_["settings.set_locale"].format(locale))
         else:
             await inter.send(locale_["settings.invalid_locale"])
 
