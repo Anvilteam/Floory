@@ -61,7 +61,7 @@ class Settings(commands.Cog):
             webhooks = await inter.guild.webhooks()
             is_created, news = core.tools.news_status(webhooks)
             if not is_created:
-                source = self.client.get_channel(917017050495471648)
+                source = self.client.get_channel(917015010801238037)
                 news: disnake.Webhook = await source.follow(destination=channel)
                 await news.edit(name="FlooryNews")
                 await inter.send(locale["news_on"])

@@ -2,7 +2,7 @@ import disnake
 import logging
 import os
 from disnake.ext import commands
-from core.tools import is_bot_developer
+from core.tools import is_bot_developer, color_codes
 from core.database import cur
 from core.exceptions import *
 from loguru import logger
