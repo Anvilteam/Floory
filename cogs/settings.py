@@ -89,7 +89,7 @@ class Settings(commands.Cog):
         webhooks = await inter.guild.webhooks()
         is_created, news = core.tools.news_status(webhooks)
         if not is_created:
-            await inter.send(locale["notCreatedYet"])
+            await inter.send(locale["settings.notCreatedYet"])
         else:
             await news.edit(channel=channel)
             await inter.send(locale["settings.set_news_channel"])
