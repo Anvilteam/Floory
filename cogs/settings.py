@@ -65,7 +65,7 @@ class Settings(commands.Cog):
                 source = self.client.get_channel(917015010801238037)
                 news: disnake.Webhook = await source.follow(destination=channel)
                 await news.edit(name="FlooryNews")
-                await inter.send(locale["news_on"])
+                await inter.send(locale["settings.news_on"])
             else:
                 await inter.send(locale["settings.alreadyCreated"])
 
@@ -74,7 +74,7 @@ class Settings(commands.Cog):
             is_created, news = core.tools.news_status(webhooks)
             if is_created:
                 await news.delete()
-                await inter.send(locale["news_off"])
+                await inter.send(locale["settings.news_off"])
             else:
                 await inter.send(locale["settings.notCreatedYet"])
         else:
