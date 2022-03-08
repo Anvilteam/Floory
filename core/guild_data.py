@@ -1,4 +1,4 @@
-import database
+import core.database as database
 
 
 class GuildData:

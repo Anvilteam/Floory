@@ -1,6 +1,5 @@
 import json
 import disnake
-from guild_data import GuildData
 from core.exceptions import *
 from core.database import redis_client, cur
 
