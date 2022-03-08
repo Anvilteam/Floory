@@ -43,9 +43,13 @@ logger.info("Запуск disnake..")
 async def load_cache():
     with Bar('Загрузка кэша', max=len(client.guilds)) as bar:
         for guild in client.guilds:
-            data = await cur("fetch", f"SELECT * FROM `guilds` WHERE `guild` = {guild.id}")
-            await redis_client.lpush(guild.id, data[1], data[2], data[3])
-            bar.next()
+            data = await cur("fetchall", f"SELECT * FROM `guilds` WHERE `guild` = {guild.id}")
+            print(data)
+            try:
+                await redis_client.lpush(guild.id, data[1], data[2], data[3])
+                bar.next()
+            except IndexError:
+                pass
 
 
 @client.event

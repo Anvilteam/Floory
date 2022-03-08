@@ -8,7 +8,7 @@ from loguru import logger
 cfg = yaml.safe_load(open('config.yaml', 'r'))
 loop = asyncio.get_event_loop()
 
-redis_client = aioredis.from_url("redis://localhost", db=0, decode_responses=True)
+redis_client = aioredis.from_url(url="redis://127.0.0.1", port=6379, db=0, decode_responses=True)
 
 
 async def connect():
