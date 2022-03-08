@@ -4,6 +4,7 @@ import random
 from disnake.ext import commands
 from disnake.ext.commands import Param
 from core.tools import LangTool, perms_to_dict, has_permissions, is_guild_owner
+from core.guild_data import GuildData, get_locale
 
 
 class Utils(commands.Cog):
@@ -18,8 +19,8 @@ class Utils(commands.Cog):
     @utils.sub_command(description="получение информации о пользователе")
     async def member(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member = commands.Param(description='пользователь')):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         guild_owner = inter.guild.owner
         name = member.name
         created_at = member.created_at.strftime('%Y.%m.%d %H:%M:%S')
@@ -46,8 +47,8 @@ class Utils(commands.Cog):
     @commands.cooldown(1, 45, commands.BucketType.member)
     @utils.sub_command(description="информация о сервере")
     async def server(self, inter: disnake.ApplicationCommandInteraction):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         guild = inter.guild
         icon = guild.icon
         owner = guild.owner
@@ -85,8 +86,8 @@ class Utils(commands.Cog):
     async def permissions(self, inter: disnake.ApplicationCommandInteraction,
                           member: disnake.Member = commands.Param(description='пользователь')):
         emojies = {0: '❌', 1: '✅'}
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         member_perms = perms_to_dict(member.guild_permissions)
         # '❌|✅', 'permission translate', 'new line'
         embed_value = "".join(
@@ -113,8 +114,8 @@ class Utils(commands.Cog):
                      image: disnake.Attachment = Param(default=None, description="картинка (по желанию)"),
                      variants: str = Param(description="варианты для голосование (через '|')"),
                      footer: str = Param(default=None, description="футер эмбда (надпись внизу)")):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         view = disnake.ui.View()
         embed = disnake.Embed(title=title, description=description)
         if footer is not None:

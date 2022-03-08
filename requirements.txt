@@ -1,6 +1,6 @@
 disnake==2.4.0
+loguru==0.6.0
 PyYAML==6.0
 aiomysql==0.0.22
-redis==4.1.2
+aioredis==2.0.1
 progress==1.6
-loguru==0.6.0

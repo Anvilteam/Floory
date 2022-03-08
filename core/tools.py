@@ -1,5 +1,6 @@
 import json
 import disnake
+from guild_data import GuildData
 from core.exceptions import *
 from core.database import redis_client, cur
 
@@ -11,24 +12,14 @@ developers = [551439984255696908]
 
 
 class LangTool:
-    def __init__(self, guild_id):
-        self._locale = None
-        self.guild_id = guild_id
+    def __init__(self, locale):
+        self._locale = locale
 
     def __getitem__(self, key) -> str:
         category, frase = key.split(".")
         with open(f"locales/{self._locale}/{category}.json", "r", encoding='UTF-8') as f:
             data = json.load(f)
             return data[frase]
-
-    async def set(self):
-        locale = redis_client.get(self.guild_id)
-        if locale is not None:
-            self._locale = locale.decode()
-        else:
-            locale = await cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {self.guild_id}")
-            redis_client.set(self.guild_id, locale)
-            self._locale = locale
 
 
 def has_permissions(*perms: str, position_check: bool = True):

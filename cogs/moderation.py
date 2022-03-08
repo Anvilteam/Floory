@@ -2,6 +2,7 @@ import disnake
 import datetime
 from disnake.ext import commands
 from core.tools import LangTool, has_permissions, color_codes
+from core.guild_data import GuildData, get_locale
 from core.exceptions import *
 
 
@@ -19,8 +20,8 @@ class Moderation(commands.Cog):
     async def kick(self, inter: disnake.ApplicationCommandInteraction,
                    member: disnake.Member = commands.Param(description='пользователь'),
                    reason: str = commands.Param(default=None, description='причина')):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         author = inter.author
         if reason is None:
             reason = locale["moderation.reasonIsNone"]
@@ -34,8 +35,8 @@ class Moderation(commands.Cog):
     async def ban(self, inter,
                   member: disnake.Member = commands.Param(description='пользователь'),
                   reason: str = commands.Param(default=None, description='причина')):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         author = inter.author
         if reason is None:
             reason = locale["moderation.reasonIsNone"]
@@ -52,8 +53,8 @@ class Moderation(commands.Cog):
                    hours: int = 0,
                    days: int = 0,
                    reason: str = commands.Param(default=None, description='причина')):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         author = inter.author
         if member.current_timeout is None:
             timeout = datetime.timedelta(seconds=seconds, minutes=minutes, hours=hours, days=days)
@@ -75,9 +76,9 @@ class Moderation(commands.Cog):
             await inter.delete_original_message()
             await inter.channel.purge(limit=amount)
         else:
-            locale = LangTool(inter.guild.id)
-            await locale.set()
-            await inter.send(locale["tmь"])
+            guild_locale = await get_locale(inter.guild.id)
+            locale = LangTool(guild_locale)
+            await inter.send(locale["tmm"])
 
 
 def setup(client):

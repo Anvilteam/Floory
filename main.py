@@ -10,6 +10,7 @@ from typing import List
 from core.database import redis_client, cur
 from core.exceptions import *
 from core.tools import LangTool, color_codes
+from core.guild_data import GuildData, get_locale
 from progress.bar import Bar
 from loguru import logger
 
@@ -42,8 +43,8 @@ logger.info("Запуск disnake..")
 async def load_cache():
     with Bar('Загрузка кэша', max=len(client.guilds)) as bar:
         for guild in client.guilds:
-            locale = await cur("fetch", f"SELECT `locale` FROM `guilds` WHERE `guild` = {guild.id}")
-            redis_client.set(guild.id, locale)
+            data = await cur("fetch", f"SELECT * FROM `guilds` WHERE `guild` = {guild.id}")
+            await redis_client.lpush(guild.id, data[1], data[2], data[3])
             bar.next()
 
 
@@ -64,10 +65,11 @@ async def on_ready():
 @client.event
 async def on_guild_join(guild: disnake.Guild):
     await cur("query", f"INSERT INTO guilds (guild) VALUES({guild.id});")
+    data = ["ru_RU", "true", "None"]
+    await redis_client.lpush(guild.id, data[0], data[1], data[2])
     logger.info(f"Новая гильдия! {guild.name}-{guild.id}")
     channel = guild.system_channel
-    locale = LangTool(guild.id)
-    await locale.set()
+    locale = LangTool("ru_RU")
 
     embed = disnake.Embed(title=locale["main.inviting_title"],
                           description=locale["main.inviting_description"],
@@ -82,14 +84,15 @@ async def on_guild_join(guild: disnake.Guild):
 @client.event
 async def on_guild_remove(guild: disnake.Guild):
     await cur("query", f"DELETE FROM `guilds` WHERE `guild` = {guild.id};")
+    await redis_client.delete(guild.id)
     logger.info(f"Бот покидает гильдию {guild.name}-{guild.id}")
 
 
 @client.event
 async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, error):
-    locale = LangTool(inter.guild.id)
-    await locale.set()
-    formatted = f"{error}|{error.__traceback__}"
+    guild_locale = await get_locale(inter.guild.id)
+    locale = LangTool(guild_locale)
+    formatted = f"{error}|{inter.application_command.name}"
     embed = disnake.Embed(title=locale["main.error"],
                           color=color_codes["error"])
     if isinstance(error, commands.CommandOnCooldown):
@@ -126,8 +129,8 @@ async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, e
 
 @client.event
 async def on_button_click(inter: disnake.MessageInteraction):
-    locale = LangTool(inter.guild.id)
-    await locale.set()
+    guild_locale = await get_locale(inter.guild.id)
+    locale = LangTool(guild_locale)
     match inter.component.custom_id.split('-')[0]:
         case 'voting':
             msg = inter.message
@@ -164,8 +167,6 @@ async def on_button_click(inter: disnake.MessageInteraction):
                 await inter.send(locale["utils.alreadyVoted"], ephemeral=True)
         case 'close_vote':
             if inter.author.guild_permissions.manage_messages:
-                locale = LangTool(inter.guild.id)
-                await locale.set()
                 msg = inter.message
                 embed = msg.embeds[0]
                 fields = embed.fields
@@ -191,8 +192,8 @@ async def change_status():
 @client.slash_command(description="состояние бота")
 async def status(inter: disnake.ApplicationCommandInteraction):
     splash = random.choice(cfg["bot"]["status_splashes"])
-    locale = LangTool(inter.guild.id)
-    await locale.set()
+    guild_locale = await get_locale(inter.guild.id)
+    locale = LangTool(guild_locale)
     latency = client.latency
     guilds = len(client.guilds)
     cmds = len(client.slash_commands)

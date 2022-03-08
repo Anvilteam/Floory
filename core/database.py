@@ -2,13 +2,13 @@ import asyncio
 import aiomysql
 import loguru
 import yaml
-import redis
+import aioredis
 from loguru import logger
 
 cfg = yaml.safe_load(open('config.yaml', 'r'))
 loop = asyncio.get_event_loop()
 
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+redis_client = aioredis.from_url("redis://localhost", db=0, decode_responses=True)
 
 
 async def connect():

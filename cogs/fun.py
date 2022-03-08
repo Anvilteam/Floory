@@ -4,6 +4,7 @@ import random
 import yaml
 from disnake.ext import commands
 from core.tools import LangTool
+from core.guild_data import GuildData, get_locale
 from loguru import logger
 
 emojis = {1: 946031293655842856,
@@ -27,8 +28,8 @@ class Fun(commands.Cog):
 
     @fun.sub_command(description="подбросить монетку")
     async def coin(self, inter: disnake.ApplicationCommandInteraction):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         variants = ['орел', 'решка']
         coin_choice = random.choice(variants)
         await inter.response.send_message(locale["fun.toss"])
@@ -41,8 +42,8 @@ class Fun(commands.Cog):
     @fun.sub_command(description="подбросить кубики")
     async def dice(self, inter: disnake.ApplicationCommandInteraction,
                    amount: int = commands.Param(default=2, description="кол-во кубиков")):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         waiting = 0.5
 
         if amount < 6:
@@ -61,8 +62,8 @@ class Fun(commands.Cog):
     @fun.sub_command(description="спросите магический шар о чём угодно")
     async def mystical_ball(self, inter: disnake.ApplicationCommandInteraction,
                             query: str = commands.Param(description="Ваш вопрос")):
-        locale = LangTool(inter.guild.id)
-        await locale.set()
+        guild_locale = await get_locale(inter.guild.id)
+        locale = LangTool(guild_locale)
         variant = ['main.true', 'main.false', 'fun.maybe']
         result = random.choice(variant)
         embed = disnake.Embed(title=f"🔮 - {locale['fun.mystic_ball']}",
