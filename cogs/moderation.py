@@ -78,7 +78,7 @@ class Moderation(commands.Cog):
         else:
             guild_locale = await get_locale(inter.guild.id)
             locale = LangTool(guild_locale)
-            await inter.send(locale["tmm"])
+            await inter.send(locale["moderation.tmm"])
 
 
 def setup(client):
