@@ -47,7 +47,7 @@ async def load_cache():
             if len(data) == 0:
                 await new_guild(guild.id)
             else:
-                await redis_client.lpush(guild.id, data[1], data[2], data[3])
+                await redis_client.lpush(guild.id, data[1], data[2], str(data[3]))
             bar.next()
 
 
