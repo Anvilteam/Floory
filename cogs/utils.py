@@ -3,6 +3,8 @@ import disnake
 import random
 from disnake.ext import commands
 from disnake.ext.commands import Param
+
+import core.views
 from core.tools import LangTool, perms_to_dict, has_permissions, is_guild_owner
 from core.guild_data import GuildData, get_locale
 
@@ -112,27 +114,18 @@ class Utils(commands.Cog):
                      title: str = Param(description="название голосования"),
                      description: str = Param(description="описание голосования"),
                      image: disnake.Attachment = Param(default=None, description="картинка (по желанию)"),
-                     variants: str = Param(description="варианты для голосование (через '|')"),
+                     variants: int = Param(description="кол-во вариантов ответа"),
                      footer: str = Param(default=None, description="футер эмбда (надпись внизу)")):
         guild_locale = await get_locale(inter.guild.id)
         locale = LangTool(guild_locale)
-        view = disnake.ui.View()
         embed = disnake.Embed(title=title, description=description)
         if footer is not None:
             embed.set_footer(text=footer)
-        vars = variants.split('|')
-        if len(vars) < 6:
-            for var in vars:
-                embed.add_field(name=var, value='-----')
-                custom_id = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(int(4)))
-                btn = disnake.ui.Button(label=var + '|0', custom_id=f'voting-{custom_id}-{inter.id}')
-                view.add_item(btn)
-            view.add_item(disnake.ui.Button(label=locale["utils.closeVoting"], style=disnake.ButtonStyle.red,
-                                            custom_id='close_vote', emoji='❌'))
+        if variants < 6:
             if image is not None and image.content_type == 'image/png':
                 embed.set_image(image.url)
             embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
-            await inter.send(embed=embed, view=view)
+            await inter.response.send_modal(modal=core.views.VotingModal(variants, embed, guild_locale))
         else:
             await inter.send(locale['utils.tmButtons'])
 

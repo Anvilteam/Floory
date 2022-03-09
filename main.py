@@ -137,7 +137,7 @@ async def on_button_click(inter: disnake.MessageInteraction):
             msg = inter.message
             embed = msg.embeds[0]
             fields = embed.fields
-            button: disnake.ui.Button = inter.component
+            button = inter.component
             # Разделям название варианта и кол-во проголосовавших
             label, counter = button.label.split('|')
 
@@ -159,9 +159,7 @@ async def on_button_click(inter: disnake.MessageInteraction):
                 # Обновляем кнопку
                 button_list = msg.components[0].children
                 button_list[chosen_index] = button
-                new_btn_list = []
-                for btn in button_list:
-                    new_btn_list.append(disnake.ui.Button.from_component(btn))
+                new_btn_list = [disnake.ui.Button.from_component(btn) for btn in button_list]
                 embed.set_field_at(chosen_index, name=field.name, value=field.value + f'\n{inter.author.mention}')
                 await inter.response.edit_message(embed=embed, components=new_btn_list)
             else:
