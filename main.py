@@ -10,7 +10,7 @@ from typing import List
 from core.database import redis_client, cur
 from core.exceptions import *
 from core.tools import LangTool, color_codes
-from core.guild_data import GuildData, get_locale
+from core.guild_data import GuildData, get_locale, new_guild
 from progress.bar import Bar
 from loguru import logger
 
@@ -44,12 +44,11 @@ async def load_cache():
     with Bar('Загрузка кэша', max=len(client.guilds)) as bar:
         for guild in client.guilds:
             data = await cur("fetchall", f"SELECT * FROM `guilds` WHERE `guild` = {guild.id}")
-            print(data)
-            try:
+            if len(data) == 0:
+                await new_guild(guild.id)
+            else:
                 await redis_client.lpush(guild.id, data[1], data[2], data[3])
-                bar.next()
-            except IndexError:
-                pass
+            bar.next()
 
 
 @client.event
@@ -68,9 +67,7 @@ async def on_ready():
 
 @client.event
 async def on_guild_join(guild: disnake.Guild):
-    await cur("query", f"INSERT INTO guilds (guild) VALUES({guild.id});")
-    data = ["ru_RU", "true", "None"]
-    await redis_client.lpush(guild.id, data[0], data[1], data[2])
+    await new_guild(guild.id)
     logger.info(f"Новая гильдия! {guild.name}-{guild.id}")
     channel = guild.system_channel
     locale = LangTool("ru_RU")

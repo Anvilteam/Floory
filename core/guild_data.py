@@ -20,3 +20,8 @@ async def get_locale(guild_id: int) -> int:
     locale = await database.redis_client.lrange(guild_id, 0, 0)
     return locale[0]
 
+
+async def new_guild(guild_id: id):
+    await database.cur("query", f"INSERT INTO guilds (guild) VALUES({guild_id});")
+    data = ["ru_RU", "true", "None"]
+    await database.redis_client.lpush(guild_id, data[0], data[1], data[2])
