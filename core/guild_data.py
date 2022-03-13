@@ -16,8 +16,10 @@ class GuildData:
         self.logs_channel = data[2]
 
 
-async def get_locale(guild_id: int) -> int:
-    locale = await database.redis_client.lrange(guild_id, 0, 0)
+async def get_locale(guild_id: int) -> str:
+    locale = await database.redis_client.lrange(guild_id, 0, -1)
+    locale.reverse()
+    print(locale)
     return locale[0]
 
 

@@ -7,7 +7,7 @@ from core.database import redis_client, cur
 color_codes = {'default': 0x3ef0a9,
                'error': 0x3ef0a9}
 bot_black_list = list()
-developers = [551439984255696908]
+developers = (551439984255696908,)
 
 
 class LangTool:

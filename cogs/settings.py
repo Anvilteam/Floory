@@ -46,9 +46,9 @@ class Settings(commands.Cog):
         if locale in locales:
             await cur("query", f"UPDATE `guilds` SET `locale` = '{locale}' WHERE `guild` = {inter.guild.id}")
             await redis_client.set(inter.guild.id, locale)
-            await inter.send(locale_["settings.set_locale"].format(locale))
+            await inter.send(locale_["settings.setLocale"].format(locale))
         else:
-            await inter.send(locale_["settings.invalid_locale"])
+            await inter.send(locale_["settings.invalidLocale"])
 
     @commands.cooldown(1, 200, commands.BucketType.guild)
     @settings.sub_command(description="включить/отключить новости бота")
@@ -56,8 +56,7 @@ class Settings(commands.Cog):
                    status: str = Param(autocomplete=autocomplete_statuses),
                    channel: disnake.TextChannel = Param(default=None,
                                                         description="канал куда будут поступать новости")):
-        if channel is None:
-            channel = inter.channel
+        channel_ = channel or inter.channel
         guild_locale = await get_locale(inter.guild.id)
         locale = LangTool(guild_locale)
         if status == "on":
@@ -65,9 +64,9 @@ class Settings(commands.Cog):
             is_created, news = core.tools.news_status(webhooks)
             if not is_created:
                 source = self.client.get_channel(917015010801238037)
-                news: disnake.Webhook = await source.follow(destination=channel)
+                news: disnake.Webhook = await source.follow(destination=channel_)
                 await news.edit(name="FlooryNews")
-                await inter.send(locale["settings.news_on"])
+                await inter.send(locale["settings.newsOn"])
             else:
                 await inter.send(locale["settings.alreadyCreated"])
 
@@ -76,11 +75,11 @@ class Settings(commands.Cog):
             is_created, news = core.tools.news_status(webhooks)
             if is_created:
                 await news.delete()
-                await inter.send(locale["settings.news_off"])
+                await inter.send(locale["settings.newsOff"])
             else:
                 await inter.send(locale["settings.notCreatedYet"])
         else:
-            await inter.send(locale["settings.invalid_arg"])
+            await inter.send(locale["settings.invalidArg"])
 
     @commands.cooldown(1, 120, commands.BucketType.guild)
     @settings.sub_command(description="изменить канал для новостей")
@@ -91,10 +90,49 @@ class Settings(commands.Cog):
         webhooks = await inter.guild.webhooks()
         is_created, news = core.tools.news_status(webhooks)
         if not is_created:
-            await inter.send(locale["settings.notCreatedYet"])
+            await inter.send(locale["settings.newsNotCreatedYet"])
         else:
             await news.edit(channel=channel)
-            await inter.send(locale["settings.set_news_channel"])
+            await inter.send(locale["settings.setNewsChannel"])
+
+    @commands.cooldown(1, 120, commands.BucketType.guild)
+    @settings.sub_command(description="включить/выключить логирование")
+    async def logging(self, inter: disnake.ApplicationCommandInteraction,
+                      status: str = commands.Param(autocomplete=autocomplete_statuses),
+                      channel: disnake.TextChannel = commands.Param(description="канал куда будут поступать логи")):
+        guild_data = GuildData(inter.guild.id)
+        await guild_data.set_all()
+        locale = LangTool(guild_data.locale)
+        if status == 'on':
+            if guild_data.logging == 'false':
+                await cur("query", f"UPDATE `guilds` SET `logging` = 'true' WHERE `guild` = {inter.guild.id}")
+                await cur("query",
+                          f"UPDATE `guilds` SET `logs-channel` = {channel.id} WHERE `guild` = {inter.guild.id}")
+                await inter.send(locale["settings.logsEnabled"])
+            else:
+                await inter.send(locale["settings.logsAlreadyEnabled"])
+        elif status == 'off':
+            if guild_data.logging == 'true':
+                await cur("query", f"UPDATE `guilds` SET `logging` = 'false' WHERE `guild` = {inter.guild.id}")
+                await inter.send(locale["settings.logsTurnedOff"])
+            else:
+                await inter.send(locale["settings.logsAlreadyOff"])
+        else:
+            await inter.send(locale["settings.invalidArg"])
+
+    @commands.cooldown(1, 120, commands.BucketType.guild)
+    @settings.sub_command(description="настроить канала логирования")
+    async def logs_channel(self, inter: disnake.ApplicationCommandInteraction,
+                           channel: disnake.TextChannel = commands.Param(
+                               description="канал куда будут поступать логи")):
+        guild_data = GuildData(inter.guild.id)
+        await guild_data.set_all()
+        locale = LangTool(guild_data.locale)
+        if guild_data.logging == 'false':
+            await inter.send(locale["settings.logsNotEnabledYet"])
+        else:
+            await cur("query", f"UPDATE `guilds` SET `logs-channel` = {channel.id} WHERE `guild` = {inter.guild.id}")
+            await inter.send(locale["settings.setLogsChannel"])
 
 
 def setup(client):

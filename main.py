@@ -17,7 +17,7 @@ from loguru import logger
 test_guilds = [737351356079145002,  # FallenSky
                906795717643882496  # FlooryHome
                ]
-categories = ['moderation', 'utils', 'guild_config', 'fun']
+categories = ('moderation', 'utils', 'guild_config', 'fun')
 
 
 async def autocomplete_categories(inter, string: str) -> List[str]:
@@ -42,6 +42,7 @@ logger.info("Запуск disnake..")
 
 async def load_cache():
     with Bar('Загрузка кэша', max=len(client.guilds)) as bar:
+        await redis_client.flushdb(True)
         for guild in client.guilds:
             data = await cur("fetchall", f"SELECT * FROM `guilds` WHERE `guild` = {guild.id}")
             if len(data) == 0:
@@ -138,6 +139,7 @@ async def on_button_click(inter: disnake.MessageInteraction):
             embed = msg.embeds[0]
             fields = embed.fields
             button = inter.component
+            view = disnake.ui.View.from_message(msg, timeout=None)
             # Разделям название варианта и кол-во проголосовавших
             label, counter = button.label.split('|')
 
@@ -155,29 +157,11 @@ async def on_button_click(inter: disnake.MessageInteraction):
             logger.info(label)
             if inter.author.mention not in votes:
                 # Прибавляем 1 к счетчику на кнопке
-                button.label = label + f'|{int(counter) + 1}'
-                # Обновляем кнопку
-                button_list = msg.components[0].children
-                button_list[chosen_index] = button
-                new_btn_list = [disnake.ui.Button.from_component(btn) for btn in button_list]
+                view.children[chosen_index].label = label + f'|{int(counter) + 1}'
                 embed.set_field_at(chosen_index, name=field.name, value=field.value + f'\n{inter.author.mention}')
-                await inter.response.edit_message(embed=embed, components=new_btn_list)
+                await inter.response.edit_message(embed=embed, view=view)
             else:
                 await inter.send(locale["utils.alreadyVoted"], ephemeral=True)
-        case 'close_vote':
-            if inter.author.guild_permissions.manage_messages:
-                msg = inter.message
-                embed = msg.embeds[0]
-                fields = embed.fields
-                fields_names = [f.name for f in fields]
-                button_list = msg.components[0].children
-                btns_counter = [button.label.split('|')[1] for button in button_list if
-                                button.style != disnake.ButtonStyle.red]
-                for i in range(len(fields_names)):
-                    embed.set_field_at(i, name=fields_names[i], value=btns_counter[i])
-                await inter.response.edit_message(content=locale['utils.votingEnd'], embed=embed, components=[])
-            else:
-                await inter.send(locale["utils.nep"], ephemeral=True)
 
 
 @tasks.loop(seconds=300.0)
@@ -203,7 +187,7 @@ async def status(inter: disnake.ApplicationCommandInteraction):
     embed.add_field(name="🛡 " + locale["main.guilds"], value=f"```{guilds}```")
     embed.add_field(name="⚙ " + locale["main.cmds"], value=f"```{cmds}```", inline=False)
     embed.add_field(name="👥 " + locale["main.users"], value=f"```{users}```")
-    embed.add_field(name="💻 " + locale["main.owners"], value=f"```Xemay#9586\nRedWolf#2007\nD3st0nλ#5637```",
+    embed.add_field(name="💻 " + locale["main.owners"], value=f"```Xemay#9586\nRedWolf#5064\nD3st0nλ#5637```",
                     inline=False)
     embed.add_field(name="<:github:945683293666439198> Github", value="[Тык](https://github.com/Anvilteam/Floory)")
     embed.add_field(name="🎲 Version", value="```0.3 beta```", inline=False)
