@@ -4,4 +4,4 @@ CREATE TABLE `guilds` (
     `logging` VARCHAR(8) NOT NULL DEFAULT 'false',
     `logs-channel` BIGINT NULL DEFAULT NULL,
     PRIMARY KEY (`guild`)
-) COLLATE='utf8mb4_0900_ai_ci';
+);
