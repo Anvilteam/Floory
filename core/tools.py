@@ -1,13 +1,20 @@
+import functools
 import json
+import os
+import pathlib
+
 import disnake
+from disnake.ext import commands
 from core.exceptions import *
 from core.database import redis_client, cur
+from loguru import logger
 
+from pathlib import Path
 
-color_codes = {'default': 0x3ef0a9,
-               'error': 0x3ef0a9}
-bot_black_list = list()
-developers = (551439984255696908,)
+COLORS = {'default': 0x3ef0a9,
+          'error': 0x3ef0a9}
+BLACK_LIST = list()
+DEVELOPERS = (551439984255696908,)
 
 
 class LangTool:
@@ -21,23 +28,11 @@ class LangTool:
             return data[frase]
 
 
-def has_permissions(*perms: str, position_check: bool = True):
+def is_higher():
     def predicate(inter):
-        check = True
-        if position_check:
-            check = inter.author.top_role > inter.filled_options["member"].top_role
-        if check:
-            author_perms: dict = perms_to_dict(inter.author.guild_permissions)
-
-            def check(p):
-                return not author_perms[p]
-
-            missing_perms = list(filter(check, perms))
-            if len(missing_perms) != 0:
-                raise NotEnoughPerms(missing_perms)
-        else:
+        check = inter.author.top_role > inter.filled_options["member"].top_role
+        if not check:
             raise MemberHigherPermissions
-
         return True
 
     return commands.check(predicate)
@@ -56,7 +51,7 @@ def is_guild_owner():
 def is_bot_developer():
     def predicate(inter):
         # Список id разработчиков бота
-        if inter.author.id not in developers:
+        if inter.author.id not in DEVELOPERS:
             raise NotDeveloper
         return True
 
@@ -79,13 +74,31 @@ def news_status(webhooks: list[disnake.Webhook]) -> tuple:
 def perms_to_dict(perms: disnake.Permissions) -> dict:
     """Превращает disnake.Permissions в словарь для удобной работы"""
 
-    permissions = {}
+    permissions = {perm: value for perm, value in perms}
     # iter(author_perms) -> (permission, value)
-    for perm, value in perms:
-        permissions[perm] = value
     return permissions
 
 
 def not_in_black_list():
     def predicate(inter):
         pass
+
+
+def translated(*paths):
+    def wraps(cls: commands.Cog):
+        translations = {}
+        for p in paths:
+            folder = Path(p).resolve()
+            print(folder)
+            multi_lang = {}
+            for l in folder.iterdir():
+                logger.info(f"Загрузка {l} для {cls.__cog_name__}")
+                with open(l, "r", encoding='UTF-8') as f:
+                    multi_lang[l.name[:-5]] = json.load(f)
+
+            translations = translations | multi_lang
+        cls.lang = translations
+        return cls
+
+    return wraps
+

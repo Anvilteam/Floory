@@ -9,7 +9,7 @@ from disnake.ext import commands, tasks
 from typing import List
 from core.database import redis_client, cur
 from core.exceptions import *
-from core.tools import LangTool, color_codes
+from core.tools import LangTool, COLORS
 from core.guild_data import GuildData, get_locale, new_guild
 from progress.bar import Bar
 from loguru import logger
@@ -33,10 +33,10 @@ logger.add("logs/floory_{time}.log", enqueue=True)
 
 # Загрузка конфигурации и клиента
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
-client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
-# test_guilds=test_guilds,
-# sync_commands_debug=True,
-# sync_permissions=True)
+client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all(),
+ test_guilds=test_guilds,
+ sync_commands_debug=True,
+ sync_permissions=True)
 logger.info("Запуск disnake..")
 
 
@@ -56,8 +56,8 @@ async def load_cache():
 async def on_ready():
     logger.info("Начало загрузки когов")
     for filename in os.listdir('./cogs'):
-        if filename.endswith('.py'):
-            client.load_extension(f'cogs.{filename[:-3]}')
+        if filename != '__pycache__':
+            client.load_extension(f'cogs.{filename}')
             logger.info(f"Ког {filename} загружен")
     logger.info("Начало загрузки кэша")
     await core.database.connect()
@@ -75,7 +75,7 @@ async def on_guild_join(guild: disnake.Guild):
 
     embed = disnake.Embed(title=locale["main.inviting_title"],
                           description=locale["main.inviting_description"],
-                          color=color_codes['default'])
+                          color=COLORS['default'])
     embed.add_field(name=locale["main.faq1Q"], value=locale["main.faq1A"])
     embed.add_field(name=locale["main.faq2Q"], value=locale["main.faq2A"], inline=False)
     embed.add_field(name=locale["main.faq3Q"], value=locale["main.faq3A"], inline=False)
@@ -92,18 +92,19 @@ async def on_guild_remove(guild: disnake.Guild):
 
 @client.event
 async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, error):
+    print(error)
     guild_locale = await get_locale(inter.guild.id)
     locale = LangTool(guild_locale)
     formatted = f"{error}|{inter.application_command.name}"
     embed = disnake.Embed(title=locale["main.error"],
-                          color=color_codes["error"])
+                          color=COLORS["error"])
     if isinstance(error, commands.CommandOnCooldown):
         embed.add_field(name=f"```CommandOnCooldown```",
                         value=locale["exceptions.CommandOnCooldown"].format(
                             time=f'{error.retry_after:.2f}{locale["main.second"]}'))
 
-    elif isinstance(error, NotEnoughPerms):
-        permissions = error.permissions
+    elif isinstance(error, commands.MissingPermissions):
+        permissions = error.missing_permissions
         embed_value = ''
         for perm in permissions:
             string = f"❌ {locale[f'permissions.{perm}']}\n"
@@ -129,41 +130,6 @@ async def on_slash_command_error(inter: disnake.ApplicationCommandInteraction, e
     await inter.send(embed=embed, view=core.views.SupportServer())
 
 
-@client.event
-async def on_button_click(inter: disnake.MessageInteraction):
-    guild_locale = await get_locale(inter.guild.id)
-    locale = LangTool(guild_locale)
-    match inter.component.custom_id.split('-')[0]:
-        case 'voting':
-            msg = inter.message
-            embed = msg.embeds[0]
-            fields = embed.fields
-            button = inter.component
-            view = disnake.ui.View.from_message(msg, timeout=None)
-            # Разделям название варианта и кол-во проголосовавших
-            label, counter = button.label.split('|')
-
-            # Проверяем проголосовал ли юзер или нет
-            votes = ''
-            variants = []
-            for f in fields:
-                variants.append(f.name)
-                votes += f.value
-
-            # Получаем индекс элемента за который проголосовали
-            chosen_index = variants.index(label)
-            field = fields[chosen_index]
-
-            logger.info(label)
-            if inter.author.mention not in votes:
-                # Прибавляем 1 к счетчику на кнопке
-                view.children[chosen_index].label = label + f'|{int(counter) + 1}'
-                embed.set_field_at(chosen_index, name=field.name, value=field.value + f'\n{inter.author.mention}')
-                await inter.response.edit_message(embed=embed, view=view)
-            else:
-                await inter.send(locale["utils.alreadyVoted"], ephemeral=True)
-
-
 @tasks.loop(seconds=300.0)
 async def change_status():
     """Каждые 5 минут меняет статус"""
@@ -183,7 +149,7 @@ async def status(inter: disnake.ApplicationCommandInteraction):
     users = len(client.users)
     embed = disnake.Embed(title="FlooryBot",
                           description=f"```{latency * 1000:.0f} ms | {splash}```",
-                          color=color_codes['default'])
+                          color=COLORS['default'])
     embed.add_field(name="🛡 " + locale["main.guilds"], value=f"```{guilds}```")
     embed.add_field(name="⚙ " + locale["main.cmds"], value=f"```{cmds}```", inline=False)
     embed.add_field(name="👥 " + locale["main.users"], value=f"```{users}```")
@@ -237,7 +203,7 @@ async def help(inter: disnake.ApplicationCommandInteraction):
                                       "\n"
                                       "Здесь будут кратко описаны категории и их префиксы т.к. описание самих команд "
                                       "Вы увидете когда будете их писать.",
-                          color=color_codes['default'])
+                          color=COLORS['default'])
     embed.add_field(name="🛡 Модерация",
                     value="> Обычные команды модерации, не более\nПрефикс - `moderation`")
     embed.add_field(name="⚙ Настройки",

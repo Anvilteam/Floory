@@ -4,6 +4,7 @@ import loguru
 import yaml
 import aioredis
 from loguru import logger
+from typing import Literal
 
 cfg = yaml.safe_load(open('config.yaml', 'r'))
 loop = asyncio.get_event_loop()
@@ -21,18 +22,18 @@ async def connect():
 
 
 @logger.catch
-async def cur(_type, arg):
+async def cur(_type: Literal["query", "fetch", "fetchall"], arg: str):
     result = None
-    async with connection.cursor() as cur:
+    async with connection.cursor() as cur_:
         match _type:
             case 'query':
-                await cur.execute(arg)
+                await cur_.execute(arg)
             case 'fetch':
-                await cur.execute(arg)
-                result = await cur.fetchone()
+                await cur_.execute(arg)
+                result = await cur_.fetchone()
             case 'fetchall':
-                await cur.execute(arg)
-                result = await cur.fetchall()
+                await cur_.execute(arg)
+                result = await cur_.fetchall()
     if result is not None and len(result) == 1:
         result = result[0]
     if result is not None:

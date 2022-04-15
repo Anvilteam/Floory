@@ -25,4 +25,4 @@ class NotDeveloper(commands.CheckFailure):
 
 class InBlacklist(commands.CommandError):
     def __init__(self):
-        super().__init__('InBlacklist: Member is blocked by bot developers')
+        super().__init__('InBlacklist: Member is blocked by bot DEVELOPERS')

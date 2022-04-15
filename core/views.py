@@ -30,11 +30,45 @@ class CloseBugTicket(disnake.ui.View):
 
     @disnake.ui.button(label="Закрыть обсуждение", emoji='❌', style=disnake.ButtonStyle.grey)
     async def close(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
-        if inter.author.id in core.tools.developers:
+        if inter.author.id in core.tools.DEVELOPERS:
             await inter.response.defer()
             await inter.delete_original_message()
         else:
             await inter.send("Вы не разработчик!", ephemeral=True)
+
+
+class VotingButton(disnake.ui.Button):
+    def __init__(self, label, custom_id):
+        super().__init__(style=disnake.ButtonStyle.grey,
+                         label=label,
+                         custom_id=custom_id)
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        guild_locale = await get_locale(interaction.guild.id)
+        locale = LangTool(guild_locale)
+        msg = interaction.message
+        embed = msg.embeds[0]
+        fields = embed.fields
+        button = interaction.component
+        view = disnake.ui.View.from_message(msg, timeout=None)
+        # Разделям название варианта и кол-во проголосовавших
+        label, counter = button.label.split('|')
+
+        # Проверяем проголосовал ли юзер или нет
+        votes = ''.join([f.value for f in fields])
+        variants = [f.name for f in fields]
+
+        # Получаем индекс элемента за который проголосовали
+        chosen_index = variants.index(label)
+        field = fields[chosen_index]
+
+        if interaction.author.mention not in votes:
+            # Прибавляем 1 к счетчику на кнопке
+            view.children[chosen_index].label = label + f'|{int(counter) + 1}'
+            embed.set_field_at(chosen_index, name=field.name, value=field.value + f'\n{interaction.author.mention}')
+            await interaction.response.edit_message(embed=embed, view=view)
+        else:
+            await interaction.send(locale["utils.alreadyVoted"], ephemeral=True)
 
 
 class CloseVoting(disnake.ui.Button):
@@ -42,7 +76,8 @@ class CloseVoting(disnake.ui.Button):
         super().__init__(style=disnake.ButtonStyle.red,
                          label=phrase,
                          emoji='❌',
-                         custom_id=''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(int(4))))
+                         custom_id=''.join(
+                             random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
 
     async def callback(self, interaction: disnake.MessageInteraction):
         guild_locale = await get_locale(interaction.guild.id)
@@ -73,7 +108,6 @@ class VotingModal(disnake.ui.Modal):
                  embed: disnake.Embed,
                  locale: str):
         components = []
-        print(locale)
         self.embed = embed
         self.locale = LangTool(locale)
         for i in range(variants_count):
@@ -88,8 +122,8 @@ class VotingModal(disnake.ui.Modal):
         view = disnake.ui.View(timeout=None)
         for var in variants:
             self.embed.add_field(name=var, value='-----')
-            custom_id = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(int(4)))
-            btn = disnake.ui.Button(label=var + '|0', custom_id=f'voting-{custom_id}-{interaction.id}')
+            custom_id = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4))
+            btn = VotingButton(label=var, custom_id=custom_id)
             view.add_item(btn)
-        view.add_item(CloseVoting(self.locale[""]))
+        view.add_item(CloseVoting(self.locale["utils.closeVoting"]))
         await interaction.send(embed=self.embed, view=view)

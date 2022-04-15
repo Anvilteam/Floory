@@ -2,8 +2,8 @@ import disnake
 import logging
 import os
 from disnake.ext import commands
-from core.tools import is_bot_developer, color_codes
-from core.database import cur
+from core.tools import is_bot_developer, COLORS
+from core.database import cur, redis_client
 from core.exceptions import *
 from loguru import logger
 
@@ -41,6 +41,8 @@ class Dev(commands.Cog):
             except commands.ExtensionNotFound:
                 await inter.send(f"Ког {cog} не найден")
 
+    @dev.sub_command(description="получить кэш гильдии")
+    async def get_cache(self, inter: disnake.ApplicationCommandInteraction):
+        cache = (await redis_client.lrange(inter.guild.id, 0, -1))[::-1]
+        await inter.send(''.join(cache))
 
-def setup(client):
-    client.add_cog(Dev(client))
