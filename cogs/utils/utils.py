@@ -5,20 +5,19 @@ from disnake.ext import commands
 from disnake.ext.commands import Param
 
 import core.views
-from core.tools import LangTool, perms_to_dict, is_guild_owner, translated
+from core.tools import LangTool, perms_to_dict, translated
 from core.guild_data import get_locale
 
 __file__ = "cogs/utils/locales"
 
 
-@translated(__file__)
+@translated(__file__, "locales/permissions", "locales/main")
 class Utils(commands.Cog):
     def __init__(self, client):
         self.client = client
 
     @commands.slash_command()
     async def utils(self, inter):
-        print(self.lang)
         pass
 
     @commands.cooldown(1, 45, commands.BucketType.member)

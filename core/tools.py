@@ -1,8 +1,4 @@
-import functools
 import json
-import os
-import pathlib
-
 import disnake
 from disnake.ext import commands
 from core.exceptions import *
@@ -87,18 +83,22 @@ def not_in_black_list():
 def translated(*paths):
     def wraps(cls: commands.Cog):
         translations = {}
+        multi_lang = {}
         for p in paths:
             folder = Path(p).resolve()
             print(folder)
-            multi_lang = {}
+
             for l in folder.iterdir():
                 logger.info(f"Загрузка {l} для {cls.__cog_name__}")
                 with open(l, "r", encoding='UTF-8') as f:
                     multi_lang[l.name[:-5]] = json.load(f)
 
-            translations = translations | multi_lang
+            for k, v in multi_lang.items():
+                if k not in translations.keys():
+                    translations[k] = {}
+                translations[k] = translations[k] | multi_lang[k]
+
         cls.lang = translations
         return cls
 
     return wraps
-
