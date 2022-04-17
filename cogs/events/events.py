@@ -47,25 +47,25 @@ class Events(commands.Cog):
                               color=COLORS["error"])
         if isinstance(error, commands.CommandOnCooldown):
             embed.add_field(name=f"```CommandOnCooldown```",
-                            value=self.lang["CommandOnCooldown"].format(
+                            value=self.lang[locale]["CommandOnCooldown"].format(
                                 time=f'{error.retry_after:.2f}{self.lang[locale]["second"]}'))
 
         elif isinstance(error, commands.MissingPermissions):
             permissions = error.missing_permissions
             embed_value = ''
             for perm in permissions:
-                string = f"❌ {self.lang[perm]}\n"
+                string = f"❌ {self.lang[locale][perm]}\n"
                 embed_value += string
             embed.add_field(name=f"```NotEnoughPerms```",
-                            value=self.lang["NotEnoughPerms"])
+                            value=self.lang[locale]["NotEnoughPerms"])
             embed.add_field(name="> Необходимые права", value=embed_value)
 
         elif isinstance(error, MemberHigherPermissions):
             embed.add_field(name=f"```MemberHigherPermissions```",
-                            value=self.lang["MemberHigherPermissions"])
+                            value=self.lang[locale]["MemberHigherPermissions"])
         elif isinstance(error, disnake.Forbidden):
             embed.add_field(name=f"```Forbidden```",
-                            value=self.lang["exceptions.Forbidden"])
+                            value=self.lang[locale]["Forbidden"])
         else:
             embed.description = formatted
             logger.error("-----------------Неизвестная ошибка!----------------")
@@ -74,5 +74,5 @@ class Events(commands.Cog):
             logger.error("----------------------------------------------------")
 
         embed.set_thumbnail(file=disnake.File("logo.png"))
-        embed.set_footer(text=self.lang["unknown"])
+        embed.set_footer(text=self.lang[locale]["unknown"])
         await inter.send(embed=embed, view=SupportServer())
