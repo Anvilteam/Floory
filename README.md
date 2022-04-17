@@ -2,7 +2,7 @@
 FlooryBot - это дочерний проект команды AnvilDev, бот для удобной модерации серверов дискорда
 
 ## Установка
-`git clone https://github.com/Anvilteam/Floory`
+`git clone https://gitea.destony.dev/AnvilDev/Floory`
 
 `pip install -r requirements.txt`
 
