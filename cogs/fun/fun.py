@@ -69,3 +69,12 @@ class Fun(commands.Cog):
         embed.add_field(name=self.lang[guild_locale]['answer'],
                         value=self.lang[guild_locale][result])
         await inter.send(embed=embed)
+
+    @fun.sub_command(description="получить рандомный эмодзи")
+    async def random_emoji(self, inter: disnake.ApplicationCommandInteraction):
+        emoji = random.choice(self.client.emojis)
+        embed = disnake.Embed(title="Эмоджи")
+        embed.add_field("Ссылочка", f"[клик]({emoji.url})")
+        embed.set_image(emoji.url)
+        await inter.send(embed=embed)
+
