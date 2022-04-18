@@ -137,7 +137,7 @@ class VotingModal(disnake.ui.Modal):
         for var in variants:
             self.embed.add_field(name=var, value='-----')
             custom_id = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4))
-            btn = VotingButton(label=var, custom_id=custom_id)
+            btn = VotingButton(label=var+"|0", custom_id=custom_id)
             view.add_item(btn)
         view.add_item(CloseVoting(self.lang[locale]["closeVoting"]))
         await interaction.send(embed=self.embed, view=view)
