@@ -19,7 +19,7 @@ emojis = {1: 946031293655842856,
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
 
 
-@translated(__file__)
+@translated(__file__, "locales/main")
 class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -61,7 +61,7 @@ class Fun(commands.Cog):
     async def mystical_ball(self, inter: disnake.ApplicationCommandInteraction,
                             query: str = commands.Param(description="Ваш вопрос")):
         guild_locale = await get_locale(inter.guild.id)
-        variant = ['main.true', 'main.false', 'fun.maybe']
+        variant = ['true', 'false', 'maybe']
         result = random.choice(variant)
         embed = disnake.Embed(title=f"🔮 - {self.lang[guild_locale]['mystic_ball']}",
                               description=f"{inter.author} **{self.lang[guild_locale]['asks']}** {query}",
