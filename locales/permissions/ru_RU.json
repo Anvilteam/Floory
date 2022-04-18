@@ -8,7 +8,7 @@
   "view_audit_log": "Просматривать журнал аудита",
   "priority_speaker": "Приоритетный режим",
   "stream": "Видео",
-  "read_messages": "read_messages",
+  "read_messages": "Читать сообщения",
   "send_messages": "Отправлять сообщения",
   "send_tts_messages": "Отправка сообщений text-to-speech",
   "manage_messages": "Управлять сообщениями",

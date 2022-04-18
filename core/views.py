@@ -2,7 +2,7 @@ import disnake
 import core
 import string
 import random
-from core.tools import LangTool
+from core.tools import LangTool, translated
 from core.guild_data import get_locale
 
 
@@ -42,10 +42,12 @@ class VotingButton(disnake.ui.Button):
         super().__init__(style=disnake.ButtonStyle.grey,
                          label=label,
                          custom_id=custom_id)
+        self.lang = {"ru_RU": "Вы уже проголосовали!"
+
+        }
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        guild_locale = await get_locale(interaction.guild.id)
-        locale = LangTool(guild_locale)
+        locale = await get_locale(interaction.guild.id)
         msg = interaction.message
         embed = msg.embeds[0]
         fields = embed.fields
@@ -55,8 +57,8 @@ class VotingButton(disnake.ui.Button):
         label, counter = button.label.split('|')
 
         # Проверяем проголосовал ли юзер или нет
-        votes = ''.join([f.value for f in fields])
-        variants = [f.name for f in fields]
+        votes = ''.join(map(lambda f: f.value, fields))
+        variants = list(map(lambda f: f.name, fields))
 
         # Получаем индекс элемента за который проголосовали
         chosen_index = variants.index(label)
@@ -68,7 +70,7 @@ class VotingButton(disnake.ui.Button):
             embed.set_field_at(chosen_index, name=field.name, value=field.value + f'\n{interaction.author.mention}')
             await interaction.response.edit_message(embed=embed, view=view)
         else:
-            await interaction.send(locale["utils.alreadyVoted"], ephemeral=True)
+            await interaction.send(self.lang[locale]["alreadyVoted"], ephemeral=True)
 
 
 class CloseVoting(disnake.ui.Button):
@@ -78,10 +80,12 @@ class CloseVoting(disnake.ui.Button):
                          emoji='❌',
                          custom_id=''.join(
                              random.choice(string.ascii_lowercase + string.digits) for _ in range(4)))
+        self.lang = {"ru_RU": {"votingEnd": "Голосование закончено",
+                               "nep": "Не достаточно прав (управлять сообщениями)"},
+                     "en_US": {}}
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        guild_locale = await get_locale(interaction.guild.id)
-        locale = LangTool(guild_locale)
+        locale = await get_locale(interaction.guild.id)
         if interaction.author.guild_permissions.manage_messages:
             msg = interaction.message
             embed = msg.embeds[0]
@@ -92,9 +96,9 @@ class CloseVoting(disnake.ui.Button):
                             button.style != disnake.ButtonStyle.red]
             for i in range(len(fields_names)):
                 embed.set_field_at(i, name=fields_names[i], value=btns_counter[i])
-            await interaction.response.edit_message(content=locale['utils.votingEnd'], embed=embed, components=[])
+            await interaction.response.edit_message(content=self.lang[locale]['votingEnd'], embed=embed, components=[])
         else:
-            await interaction.send(locale["utils.nep"], ephemeral=True)
+            await interaction.send(self.lang[locale]["nep"], ephemeral=True)
 
 
 class SupportServer(disnake.ui.View):
@@ -109,7 +113,13 @@ class VotingModal(disnake.ui.Modal):
                  locale: str):
         components = []
         self.embed = embed
-        self.locale = LangTool(locale)
+        self.lang = \
+            {"ru_RU": {
+                "invalidVars": "Варианты не должны повторяться!",
+                "closeVoting": "Закрыть голосование"
+            }
+
+            }
         for i in range(variants_count):
             components.append(disnake.ui.TextInput(label=f"Вариант голосования {i + 1}",
                                                    custom_id="".join(
@@ -118,12 +128,16 @@ class VotingModal(disnake.ui.Modal):
         super().__init__(title="Голосование", components=components)
 
     async def callback(self, interaction: disnake.ModalInteraction):
+        locale = await get_locale(interaction.guild.id)
         variants = interaction.text_values.values()
+        if len(variants) != len(set(variants)):
+            await interaction.send(self.lang[locale]["invalidVars"])
+            return
         view = disnake.ui.View(timeout=None)
         for var in variants:
             self.embed.add_field(name=var, value='-----')
             custom_id = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(4))
             btn = VotingButton(label=var, custom_id=custom_id)
             view.add_item(btn)
-        view.add_item(CloseVoting(self.locale["utils.closeVoting"]))
+        view.add_item(CloseVoting(self.lang[locale]["closeVoting"]))
         await interaction.send(embed=self.embed, view=view)
