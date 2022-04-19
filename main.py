@@ -14,7 +14,8 @@ from progress.bar import Bar
 from loguru import logger
 
 test_guilds = [737351356079145002,  # FallenSky
-               906795717643882496  # FlooryHome
+               906795717643882496,  # FlooryHome
+               555376972990119964  # Polygon
                ]
 categories = ('moderation', 'utils', 'guild_config', 'fun')
 
