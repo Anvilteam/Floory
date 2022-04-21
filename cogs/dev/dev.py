@@ -1,6 +1,7 @@
 import disnake
 import logging
 import os
+import psutil
 from disnake.ext import commands
 from core.tools import is_bot_developer, COLORS
 from core.database import cur, redis_client
@@ -13,7 +14,6 @@ class Dev(commands.Cog):
         self.client = client
 
     @is_bot_developer()
-    @commands.cooldown(1, 60, commands.BucketType.member)
     @commands.slash_command()
     async def dev(self, inter):
         pass
@@ -44,5 +44,12 @@ class Dev(commands.Cog):
     @dev.sub_command(description="получить кэш гильдии")
     async def get_cache(self, inter: disnake.ApplicationCommandInteraction):
         cache = (await redis_client.lrange(inter.guild.id, 0, -1))[::-1]
-        await inter.send(''.join(cache))
+        await inter.send(' '.join(cache))
+
+    @dev.sub_command()
+    async def get_mem(self, inter: disnake.ApplicationCommandInteraction):
+        pid = os.getpid()
+        python_process = psutil.Process(pid)
+        memory_use = python_process.memory_info()[0] / 2. ** 30
+        await inter.send(memory_use, ephemeral=True)
 

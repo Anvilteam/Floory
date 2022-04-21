@@ -12,6 +12,7 @@ from core.database import cur, redis_client
 
 from progress.bar import Bar
 from loguru import logger
+print(disnake.__version__)
 
 test_guilds = [737351356079145002,  # FallenSky
                906795717643882496,  # FlooryHome

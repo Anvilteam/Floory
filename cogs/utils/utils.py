@@ -5,10 +5,12 @@ from disnake.ext import commands
 from disnake.ext.commands import Param
 
 import core.views
-from core.tools import LangTool, perms_to_dict, translated
+from core.tools import perms_to_dict, translated, dev_cooldown, tes_col
 from core.guild_data import get_locale
+from core.cooldown import DynamicCooldown
 
 __file__ = "cogs/utils/locales"
+cooldown = DynamicCooldown(1, 45)
 
 
 @translated(__file__, "locales/permissions", "locales/main")
@@ -20,7 +22,6 @@ class Utils(commands.Cog):
     async def utils(self, inter):
         pass
 
-    @commands.cooldown(1, 45, commands.BucketType.member)
     @utils.sub_command(description="получение информации о пользователе")
     async def member(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member = commands.Param(description='пользователь')):
@@ -48,8 +49,7 @@ class Utils(commands.Cog):
                         value=is_owner, inline=False)
         await inter.send(embed=embed, delete_after=30.0)
 
-    @commands.cooldown(1, 45, commands.BucketType.member)
-    @utils.sub_command(description="информация о сервере")
+    @utils.sub_command(name="server", description="информация о сервере")
     async def server(self, inter: disnake.ApplicationCommandInteraction):
         locale = await get_locale(inter.guild.id)
         guild = inter.guild
@@ -83,7 +83,6 @@ class Utils(commands.Cog):
             embed.set_thumbnail(url=icon.url)
         await inter.send(embed=embed, delete_after=30.0)
 
-    @commands.cooldown(1, 45, commands.BucketType.member)
     @commands.has_permissions(manage_roles=True)
     @utils.sub_command(description="получение прав конкретного пользователя")
     async def permissions(self, inter: disnake.ApplicationCommandInteraction,
@@ -99,7 +98,6 @@ class Utils(commands.Cog):
         embed.add_field(name=self.lang[locale]["perms_list"], value=embed_value)
         await inter.send(embed=embed, delete_after=30.0)
 
-    @commands.cooldown(1, 45, commands.BucketType.member)
     @utils.sub_command(description="получение аватара пользователя")
     async def avatar(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member = commands.Param(description='пользователь')):
@@ -107,26 +105,6 @@ class Utils(commands.Cog):
         embed.set_image(url=member.display_avatar.url)
         await inter.response.send_message(embed=embed)
 
-    @commands.cooldown(1, 270, commands.BucketType.member)
-    @commands.has_permissions(administrator=True)
-    @utils.sub_command(description="сделать голосование")
-    async def voting(self, inter: disnake.ApplicationCommandInteraction,
-                     title: str = Param(description="название голосования"),
-                     description: str = Param(description="описание голосования"),
-                     image: disnake.Attachment = Param(default=None, description="картинка (по желанию)"),
-                     variants: int = Param(description="кол-во вариантов ответа", lt=6),
-                     footer: str = Param(default=None, description="футер эмбда (надпись внизу)")):
-        guild_locale = await get_locale(inter.guild.id)
-        locale = LangTool(guild_locale)
-        embed = disnake.Embed(title=title, description=description)
-        if footer is not None:
-            embed.set_footer(text=footer)
-        if image is not None and image.content_type == 'image/png':
-            embed.set_image(image.url)
-        embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
-        await inter.response.send_modal(modal=core.views.VotingModal(variants, embed, guild_locale))
-
-    @commands.cooldown(1, 90, commands.BucketType.member)
     @utils.sub_command(description="получить id всех эмодзи данного сервера")
     async def get_emojis(self, inter: disnake.ApplicationCommandInteraction):
         emojis = inter.guild.emojis

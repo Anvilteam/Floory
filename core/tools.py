@@ -2,7 +2,6 @@ import json
 import disnake
 from disnake.ext import commands
 from core.exceptions import *
-from core.database import redis_client, cur
 from loguru import logger
 
 from pathlib import Path
@@ -11,17 +10,6 @@ COLORS = {'default': 0x3ef0a9,
           'error': 0x3ef0a9}
 BLACK_LIST = list()
 DEVELOPERS = (551439984255696908,)
-
-
-class LangTool:
-    def __init__(self, locale):
-        self._locale = locale
-
-    def __getitem__(self, key) -> str:
-        category, frase = key.split(".")
-        with open(f"locales/{self._locale}/{category}.json", "r", encoding='UTF-8') as f:
-            data = json.load(f)
-            return data[frase]
 
 
 def is_higher():
@@ -53,6 +41,18 @@ def is_bot_developer():
 
     return commands.check(predicate)
 
+
+def dev_cooldown(msg: disnake.Message) -> commands.Cooldown:
+    print(type(msg))
+    print(msg)
+    if msg.author.id in DEVELOPERS:
+        return commands.Cooldown(1, 90)
+    else:
+        return commands.Cooldown(1, 30)
+
+
+def tes_col(msg):
+    return commands.Cooldown(1, 150)
 
 def news_status(webhooks: list[disnake.Webhook]) -> tuple:
     """Проверяет создан ли вебхук новостей на сервере"""
@@ -86,7 +86,6 @@ def translated(*paths):
         multi_lang = {}
         for p in paths:
             folder = Path(p).resolve()
-            print(folder)
 
             for l in folder.iterdir():
                 logger.info(f"Загрузка {l} для {cls.__cog_name__}")

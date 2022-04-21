@@ -2,7 +2,7 @@ import disnake
 import datetime
 from disnake.ext import commands
 from core.tools import is_higher, translated, COLORS
-from core.guild_data import get_locale
+from core.guild_data import get_locale, GuildData
 from core.exceptions import *
 
 __file__ = "cogs/moderation/locales"
@@ -17,9 +17,16 @@ class Moderation(commands.Cog):
     @is_higher()
     @commands.slash_command()
     async def moderation(self, inter: disnake.ApplicationCommandInteraction):
-        print(inter.application_command.name)
-        print(inter.options)
         pass
+
+    @moderation.after_invoke
+    async def mod_logs(self, inter: disnake.ApplicationCommandInteraction):
+        gd = GuildData(inter.guild_id)
+        await gd.set_all()
+        if gd.logging == 'true' and gd.logs_channel != 'None':
+            channel = inter.guild.get_channel(int(gd.logs_channel))
+            embed = disnake.Embed(title=f"{inter.author} свершил правосудие над {inter.filled_options['member']}")
+            await channel.send(embed=embed)
 
     @commands.has_permissions(kick_members=True)
     @moderation.sub_command(description="выгнать участника с сервера")

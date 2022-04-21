@@ -2,7 +2,7 @@ import disnake
 import core
 import string
 import random
-from core.tools import LangTool, translated
+from core.tools import translated
 from core.guild_data import get_locale
 
 
