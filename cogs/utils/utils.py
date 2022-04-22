@@ -12,7 +12,7 @@ __file__ = "cogs/utils/locales"
 cooldown = DynamicCooldown(1, 45)
 
 
-@translated(__file__, "locales/permissions", "locales/main")
+@translated(__file__, "locales/permissions")
 class Utils(commands.Cog):
     def __init__(self, client):
         self.client = client
