@@ -1,8 +1,8 @@
 import core.database as database
 
-REDIS_ID = {'locale': 0,
+REDIS_ID = {'locale': 2,
             'logging': 1,
-            'logs_channel': 2}
+            'logs_channel': 0}
 
 
 class GuildData:
