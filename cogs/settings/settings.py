@@ -27,7 +27,8 @@ class Settings(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.slash_command()
     async def settings(self, inter):
-        pass
+        cache = (await redis_client.lrange(inter.guild.id, 0, -1))[::-1]
+        await inter.send(' '.join(cache))
 
     @settings.after_invoke
     async def settings_logs(self, inter: disnake.ApplicationCommandInteraction):
