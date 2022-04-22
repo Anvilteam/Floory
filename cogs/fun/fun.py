@@ -4,6 +4,7 @@ import random
 import yaml
 from disnake.ext import commands
 from core.tools import translated
+from core.cooldown import DynamicCooldown
 from core.guild_data import get_locale
 from loguru import logger
 
@@ -24,7 +25,7 @@ class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.cooldown(1, 25, commands.BucketType.member)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 10), commands.BucketType.member)
     @commands.slash_command()
     async def fun(self, inter):
         pass

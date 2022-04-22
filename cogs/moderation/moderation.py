@@ -2,6 +2,7 @@ import disnake
 import datetime
 from disnake.ext import commands
 from core.tools import is_higher, translated, COLORS
+from core.cooldown import DynamicCooldown
 from core.guild_data import get_locale, GuildData
 from core.exceptions import *
 
@@ -13,7 +14,7 @@ class Moderation(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.cooldown(1, 90, commands.BucketType.member)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 90), commands.BucketType.member)
     @is_higher()
     @commands.slash_command()
     async def moderation(self, inter: disnake.ApplicationCommandInteraction):
@@ -21,12 +22,16 @@ class Moderation(commands.Cog):
 
     @moderation.after_invoke
     async def mod_logs(self, inter: disnake.ApplicationCommandInteraction):
-        gd = GuildData(inter.guild_id)
-        await gd.set_all()
-        if gd.logging == 'true' and gd.logs_channel != 'None':
-            channel = inter.guild.get_channel(int(gd.logs_channel))
-            embed = disnake.Embed(title=f"{inter.author} свершил правосудие над {inter.filled_options['member']}")
-            await channel.send(embed=embed)
+        if not inter.command_failed:
+            gd = GuildData(inter.guild_id)
+            await gd.set_all()
+            if gd.logging == 'true' and gd.logs_channel != 'None':
+                channel = inter.guild.get_channel(int(gd.logs_channel))
+                embed = disnake.Embed(title=self.lang[gd.locale]["mod_logs"].format(member=inter.filled_options['member'],
+                                                                                    author=inter.author),
+                                      color=COLORS["default"])
+                embed.add_field(self.lang[gd.locale]["command"], f"> {inter.application_command.name}")
+                await channel.send(embed=embed)
 
     @commands.has_permissions(kick_members=True)
     @moderation.sub_command(description="выгнать участника с сервера")
@@ -82,7 +87,7 @@ class Moderation(commands.Cog):
         log = self.lang[locale]["moderation.unmute"].format(member=member, author=author)
         await inter.send(log)
 
-    @commands.cooldown(1, 90, commands.BucketType.member)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 90), commands.BucketType.member)
     @commands.has_permissions(manage_messages=True)
     @commands.slash_command(description="очистка чата на указанное кол-во сообщений")
     async def clear(self, inter: disnake.ApplicationCommandInteraction,

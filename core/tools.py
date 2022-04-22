@@ -8,8 +8,14 @@ from pathlib import Path
 
 COLORS = {'default': 0x3ef0a9,
           'error': 0x3ef0a9}
-BLACK_LIST = list()
-DEVELOPERS = (551439984255696908,)
+BLACK_LIST = []
+DEVELOPERS = (551439984255696908,
+              # Xemay
+              593079475453952000,
+              # artior
+              200243443467812864,
+              # D3st0ny
+              565172681532506131)
 
 
 def is_higher():
@@ -53,6 +59,7 @@ def dev_cooldown(msg: disnake.Message) -> commands.Cooldown:
 
 def tes_col(msg):
     return commands.Cooldown(1, 150)
+
 
 def news_status(webhooks: list[disnake.Webhook]) -> tuple:
     """Проверяет создан ли вебхук новостей на сервере"""

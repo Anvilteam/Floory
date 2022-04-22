@@ -7,8 +7,8 @@ import yaml
 from loguru import logger
 
 from core.tools import translated, COLORS
+from core.cooldown import DynamicCooldown
 from core.guild_data import get_locale
-from core.views import SupportServer, Idea, CloseBugTicket
 
 __file__ = "cogs/main/locales"
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
@@ -19,7 +19,7 @@ class Main(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.cooldown(1, 180, commands.BucketType.member)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 30), commands.BucketType.member)
     @commands.slash_command(description="состояние бота")
     async def status(self,
                      inter: disnake.ApplicationCommandInteraction):
@@ -40,9 +40,11 @@ class Main(commands.Cog):
         embed.add_field(name="<:github:945683293666439198> Github", value="[Тык](https://github.com/Anvilteam/Floory)")
         embed.add_field(name="🎲 Version", value="```0.3 beta```", inline=False)
         embed.set_thumbnail(file=disnake.File("logo.png"))
-        await inter.send(embed=embed, view=SupportServer())
+        v = disnake.ui.View()
+        v.add_item(disnake.ui.Button(label="Сервер поддержки", url="https://discord.gg/3KG3ue66rY"))
+        await inter.send(embed=embed, view=v)
 
-    @commands.cooldown(1, 600, commands.BucketType.member)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 600), commands.BucketType.member)
     @commands.slash_command(description="предложить идею для бота")
     async def idea(self,
                    inter: disnake.ApplicationCommandInteraction,
@@ -53,12 +55,13 @@ class Main(commands.Cog):
         embed.add_field(name="Описание", value=description)
         embed.add_field(name="Поддержали", value=f"{inter.author.mention}")
         embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
-        view = Idea()
+        view = disnake.ui.View()
+        view.add_item(disnake.ui.Button(emoji="⭐", label="Поддерживаю", custom_id=f"idea-{inter.id}"))
         msg = await channel.send(embed=embed, view=view)
         await msg.create_thread(name=title)
         await inter.send("Ваша идея была успешно предложена")
 
-    @commands.cooldown(1, 600, commands.BucketType.member)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 600), commands.BucketType.member)
     @commands.slash_command(description="сообщить о баге/ошибке в боте")
     async def bug(self,
                   inter: disnake.ApplicationCommandInteraction,
@@ -68,11 +71,13 @@ class Main(commands.Cog):
         embed = disnake.Embed(title="Баг " + bug_name)
         embed.add_field(name="Описание", value=bug_description)
         embed.set_author(name=inter.author, icon_url=inter.author.display_avatar.url)
-        msg = await channel.send(embed=embed, view=CloseBugTicket())
+        view = disnake.ui.View()
+        view.add_item(disnake.ui.Button(emoji="❌", label="Закрыть баг", custom_id="close_bug-"))
+        msg = await channel.send(embed=embed, view=view)
         await msg.create_thread(name=bug_name)
         await inter.send("Баг был успешно отправлен", ephemeral=True)
 
-    @commands.cooldown(1, 60, commands.BucketType.member)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 20), commands.BucketType.member)
     @commands.slash_command(description="список команд бота")
     async def help(self,
                    inter: disnake.ApplicationCommandInteraction):
@@ -99,7 +104,7 @@ class Main(commands.Cog):
                         inline=False)
         await inter.send(embed=embed)
 
-    @commands.cooldown(1, 45, commands.BucketType.member)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 45), commands.BucketType.member)
     @commands.slash_command(description="пинг бота")
     async def ping(self,
                    inter: disnake.ApplicationCommandInteraction):

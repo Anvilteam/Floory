@@ -4,6 +4,7 @@ from disnake.ext.commands import Param
 
 import core.tools
 from core.tools import translated
+from core.cooldown import DynamicCooldown
 from core.database import cur, redis_client
 from core.exceptions import *
 from core.guild_data import get_locale, refresh, GuildData
@@ -28,13 +29,25 @@ class Settings(commands.Cog):
     async def settings(self, inter):
         pass
 
+    @settings.after_invoke
+    async def settings_logs(self, inter: disnake.ApplicationCommandInteraction):
+        if not inter.command_failed:
+            gd = GuildData(inter.guild_id)
+            await gd.set_all()
+            if gd.logging == 'true' and gd.logs_channel != 'None':
+                channel = inter.guild.get_channel(int(gd.logs_channel))
+                embed = disnake.Embed(title=self.lang[gd.locale]["settings_logs"].format(author=inter.author))
+                options = map(lambda k, v: f"{k}:{v}", inter.filled_options.items())
+                embed.description = f"{inter.application_command.qualified_name}" + " ".join(options)
+                await channel.send(embed=embed)
+
     @settings.error
     async def settings_errors(self, inter, error):
         if isinstance(error, NotGuildOwner):
             locale = await get_locale(inter.guild.id)
             await inter.send(self.lang[locale]["NotGuildOwner"])
 
-    @commands.cooldown(1, 360, commands.BucketType.guild)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 150), commands.BucketType.member)
     @settings.sub_command(description="установить язык бота")
     async def language(self, inter: disnake.ApplicationCommandInteraction,
                        locale: str = Param(autocomplete=autocomplete_locales)):
@@ -46,7 +59,7 @@ class Settings(commands.Cog):
         else:
             await inter.send(self.lang[locale_]["invalidLocale"])
 
-    @commands.cooldown(1, 200, commands.BucketType.guild)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 60), commands.BucketType.member)
     @settings.sub_command_group(description="включить/отключить новости бота")
     async def news(self, inter: disnake.ApplicationCommandInteraction):
         pass
@@ -76,7 +89,6 @@ class Settings(commands.Cog):
             return
         await inter.send(self.lang[locale]["notCreatedYet"])
 
-    @commands.cooldown(1, 120, commands.BucketType.guild)
     @settings.sub_command(description="изменить канал для новостей")
     async def set_news_channel(self, inter: disnake.ApplicationCommandInteraction,
                                channel: disnake.TextChannel = Param(description="канал куда будут поступать новости")):
@@ -89,7 +101,7 @@ class Settings(commands.Cog):
             await news.edit(channel=channel)
             await inter.send(self.lang[locale]["setNewsChannel"])
 
-    @commands.cooldown(1, 120, commands.BucketType.guild)
+    @commands.dynamic_cooldown(DynamicCooldown(1, 60), commands.BucketType.member)
     @settings.sub_command_group()
     async def logging(self, inter: disnake.ApplicationCommandInteraction):
         pass

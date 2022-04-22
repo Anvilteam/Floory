@@ -1,7 +1,6 @@
 import disnake
 import logging
 import os
-import psutil
 from disnake.ext import commands
 from core.tools import is_bot_developer, COLORS
 from core.database import cur, redis_client
@@ -23,7 +22,12 @@ class Dev(commands.Cog):
         if isinstance(error, NotDeveloper):
             await inter.send("You are not bot developer")
 
-    @dev.sub_command(description="перезагрузить один или все коги")
+    @dev.sub_command(description="получить кэш гильдии")
+    async def get_cache(self, inter: disnake.ApplicationCommandInteraction):
+        cache = (await redis_client.lrange(inter.guild.id, 0, -1))[::-1]
+        await inter.send(' '.join(cache))
+
+"""    @dev.sub_command(description="перезагрузить один или все коги")
     async def reload_cog(self, inter: disnake.ApplicationCommandInteraction,
                          cog: str = commands.Param(default=None, description="Ког для перезагрузки, если не указан то "
                                                                              "перезагружаются все")):
@@ -39,17 +43,5 @@ class Dev(commands.Cog):
                 await inter.send(f"Ког {cog} успешно перезагружен")
                 logger.info(f"Ког {cog} успешно перезагружен")
             except commands.ExtensionNotFound:
-                await inter.send(f"Ког {cog} не найден")
-
-    @dev.sub_command(description="получить кэш гильдии")
-    async def get_cache(self, inter: disnake.ApplicationCommandInteraction):
-        cache = (await redis_client.lrange(inter.guild.id, 0, -1))[::-1]
-        await inter.send(' '.join(cache))
-
-    @dev.sub_command()
-    async def get_mem(self, inter: disnake.ApplicationCommandInteraction):
-        pid = os.getpid()
-        python_process = psutil.Process(pid)
-        memory_use = python_process.memory_info()[0] / 2. ** 30
-        await inter.send(memory_use, ephemeral=True)
+                await inter.send(f"Ког {cog} не найден")"""
 

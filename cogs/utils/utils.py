@@ -4,7 +4,6 @@ import random
 from disnake.ext import commands
 from disnake.ext.commands import Param
 
-import core.views
 from core.tools import perms_to_dict, translated, dev_cooldown, tes_col
 from core.guild_data import get_locale
 from core.cooldown import DynamicCooldown
@@ -21,6 +20,32 @@ class Utils(commands.Cog):
     @commands.slash_command()
     async def utils(self, inter):
         pass
+
+    @commands.dynamic_cooldown(cooldown, commands.BucketType.member)
+    @utils.sub_command(description="создать голосование")
+    async def voting(self, inter: disnake.ApplicationCommandInteraction,
+                     name: str = commands.Param(description="название голосования"),
+                     description: str = commands.Param(desc="описание голосования"),
+                     variants: str = commands.Param(desc="варианты голосов (через /)"),
+                     image: disnake.Attachment = commands.Param(default=None, desc="картинка")):
+        variants_ = list(filter(lambda e: e not in ("", " "), variants.split("/")))
+        print(variants_)
+        if 1 < len(variants_) < 5 and len(set(variants_)) == len(variants_):
+            locale = await get_locale(inter.guild_id)
+            embed = disnake.Embed(title=name, description=description)
+            if image is not None:
+                embed.set_image(image.url)
+            view = disnake.ui.View()
+            for v in variants_:
+                custom_id = (random.choice(string.ascii_lowercase + string.digits) for _ in range(4))
+                print(custom_id)
+                embed.add_field(name=v, value="-------------------")
+                view.add_item(disnake.ui.Button(label=v + "|0",
+                                                custom_id=f"vote-{custom_id}"))
+            view.add_item(disnake.ui.Button(label=self.lang[locale]["closeVoting"], emoji="❌", custom_id="close_vote-"))
+            await inter.send(embed=embed, view=view)
+        else:
+            await inter.send("Произошла ошибка")
 
     @utils.sub_command(description="получение информации о пользователе")
     async def member(self, inter: disnake.ApplicationCommandInteraction,
