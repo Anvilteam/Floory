@@ -38,8 +38,8 @@ class Settings(commands.Cog):
             if gd.logging == 'true' and gd.logs_channel != 'None':
                 channel = inter.guild.get_channel(int(gd.logs_channel))
                 embed = disnake.Embed(title=self.lang[gd.locale]["settings_logs"].format(author=inter.author))
-                options = map(lambda k, v: f"{k}:{v}", inter.filled_options.items())
-                embed.description = f"{inter.application_command.qualified_name}" + " ".join(options)
+                options = map(lambda k: f"{k}:{inter.filled_options[k]}", inter.filled_options.keys())
+                embed.description = f"/{inter.application_command.qualified_name}" + " ".join(options)
                 await channel.send(embed=embed)
 
     @settings.error
