@@ -11,7 +11,7 @@ from core.exceptions import MemberHigherPermissions
 __file__ = "cogs/events/locales"
 
 
-@translated(__file__, "locales/main", "locales/exceptions", "locales/permissions")
+@translated(__file__, "locales/permissions")
 class Events(commands.Cog):
     def __init__(self, client):
         self.client: commands.Bot = client
@@ -59,7 +59,7 @@ class Events(commands.Cog):
                 embed_value += string
             embed.add_field(name=f"```NotEnoughPerms```",
                             value=self.lang[locale]["NotEnoughPerms"])
-            embed.add_field(name="> Необходимые права", value=embed_value)
+            embed.add_field(name=f"> {self.lang[locale]['requiredPerms']}", value=embed_value)
 
         elif isinstance(error, MemberHigherPermissions):
             embed.add_field(name=f"```MemberHigherPermissions```",
@@ -74,7 +74,7 @@ class Events(commands.Cog):
             logger.error(f"Гильдия {inter.guild}, пользователь {inter.author}")
             logger.error("----------------------------------------------------")
             bug_channel = await self.client.fetch_channel(967072415114993664)
-            await bug_channel.send(f"загадка от жакак фреско:\n {formatted}\n"
+            await bug_channel.send(f"загадка от жака фреско:\n {formatted}\n"
                                    f"Гильдия {inter.guild}, пользователь {inter.author}")
 
         embed.set_thumbnail(file=disnake.File("logo.png"))

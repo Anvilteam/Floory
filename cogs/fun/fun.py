@@ -20,7 +20,7 @@ emojis = {1: 946031293655842856,
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
 
 
-@translated(__file__, "locales/main")
+@translated(__file__)
 class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client

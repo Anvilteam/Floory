@@ -6,4 +6,5 @@
  "mute": "{author} has muted {member} for a reason: {reason}",
  "unmute": "{author} has unmuted {member}",
 
- "tmm": "Too many messages! (Maximum 250)"}
+ "mod_logs": "{author} did justice to {member}",
+ "command": "Command"}

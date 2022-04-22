@@ -1,22 +1,16 @@
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import Param
-
 import core.tools
 from core.tools import translated
 from core.cooldown import DynamicCooldown
 from core.database import cur, redis_client
 from core.exceptions import *
 from core.guild_data import get_locale, refresh, GuildData
-from typing import List
 
 __file__ = "cogs/settings/locales"
 
 locales = ["ru_RU", "en_US"]
-
-
-async def autocomplete_locales(inter, string: str) -> List[str]:
-    return [locale for locale in locales if string.lower() in locale.lower()]
 
 
 @translated(__file__)
@@ -27,8 +21,7 @@ class Settings(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.slash_command()
     async def settings(self, inter):
-        cache = (await redis_client.lrange(inter.guild.id, 0, -1))[::-1]
-        await inter.send(' '.join(cache))
+        pass
 
     @settings.after_invoke
     async def settings_logs(self, inter: disnake.ApplicationCommandInteraction):
@@ -39,7 +32,7 @@ class Settings(commands.Cog):
                 channel = inter.guild.get_channel(int(gd.logs_channel))
                 embed = disnake.Embed(title=self.lang[gd.locale]["settings_logs"].format(author=inter.author))
                 options = map(lambda k: f"{k}:{inter.filled_options[k]}", inter.filled_options.keys())
-                embed.description = f"/{inter.application_command.qualified_name}" + " ".join(options)
+                embed.description = f"`/{inter.application_command.qualified_name} " + " ".join(options) + '`'
                 await channel.send(embed=embed)
 
     @settings.error
@@ -51,14 +44,12 @@ class Settings(commands.Cog):
     @commands.dynamic_cooldown(DynamicCooldown(1, 150), commands.BucketType.member)
     @settings.sub_command(description="установить язык бота")
     async def language(self, inter: disnake.ApplicationCommandInteraction,
-                       locale: str = Param(autocomplete=autocomplete_locales)):
+                       locale: str = Param(choices=locales)):
         locale_ = await get_locale(inter.guild.id)
         if locale in locales:
             await cur("query", f"UPDATE `guilds` SET `locale` = '{locale}' WHERE `guild` = {inter.guild.id}")
             await refresh(inter.guild.id, locale=locale)
             await inter.send(self.lang[locale_]["setLocale"].format(locale))
-        else:
-            await inter.send(self.lang[locale_]["invalidLocale"])
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 60), commands.BucketType.member)
     @settings.sub_command_group(description="включить/отключить новости бота")

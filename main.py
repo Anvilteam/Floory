@@ -18,11 +18,6 @@ test_guilds = [737351356079145002,  # FallenSky
                906795717643882496,  # FlooryHome
                555376972990119964  # Polygon
                ]
-categories = ('moderation', 'utils', 'guild_config', 'fun')
-
-
-async def autocomplete_categories(inter, string: str) -> List[str]:
-    return [category for category in categories if string.lower() in category.lower()]
 
 
 # Настройки логирования
@@ -36,10 +31,10 @@ logger.add("logs/floory_{time}.log", enqueue=True)
 cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
 logger.info("Запуск disnake..")
 
-client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all(),
-                      test_guilds=test_guilds,
-                      sync_commands_debug=True,
-                      sync_permissions=True)
+client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
+#                      test_guilds=test_guilds,
+#                      sync_commands_debug=True,
+#                      sync_permissions=True)
 
 
 @client.event

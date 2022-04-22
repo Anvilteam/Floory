@@ -1,4 +1,5 @@
-{"statistics": "Statistics",
+{"guild": "Server",
+ "statistics": "Statistics",
  "real_name": "Real nickname:",
  "uCreated_at": "Account has been created at:",
 
@@ -10,11 +11,4 @@
  "online": "Online",
  "sCreated_at": "Server has been created at:",
  "members_permissions": "{member}'s permissions",
- "perms_list": "Permission list",
-
- "tmButtons": "You can place here not more than 5 buttons",
- "closeVoting": "Close vote",
- "votingEnd": "Vote has ended",
- "test": "You don't have enough permissions to close votes!",
- "alreadyVoted": "You've already voted",
- "nep": "You don't have enough permissions!"}
+ "perms_list": "Permission list"}
