@@ -24,7 +24,7 @@ class Dev(commands.Cog):
 
     @dev.sub_command(description="получить кэш гильдии")
     async def get_cache(self, inter: disnake.ApplicationCommandInteraction):
-        cache = (await redis_client.lrange(inter.guild.id, 0, -1))[::-1]
+        cache = (await redis_client.lrange(inter.guild.id, 0, 2))
         await inter.send(' '.join(cache))
 
 """    @dev.sub_command(description="перезагрузить один или все коги")
