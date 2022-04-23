@@ -34,7 +34,7 @@ class Moderation(commands.Cog):
                 await channel.send(embed=embed)
 
     @commands.has_permissions(kick_members=True)
-    @commands.bot_has_permissions(moderate_members=True)
+    @commands.bot_has_permissions(kick_members=True)
     @moderation.sub_command(description="выгнать участника с сервера")
     async def kick(self, inter: disnake.ApplicationCommandInteraction,
                    member: disnake.Member = commands.Param(description='пользователь'),
@@ -49,7 +49,7 @@ class Moderation(commands.Cog):
         await inter.send(log)
 
     @commands.has_permissions(ban_members=True)
-    @commands.bot_has_permissions(moderate_members=True)
+    @commands.bot_has_permissions(ban_members=True)
     @moderation.sub_command(description="забанить участника")
     async def ban(self, inter: disnake.ApplicationCommandInteraction,
                   member: disnake.Member = commands.Param(description='пользователь'),
