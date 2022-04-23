@@ -11,4 +11,5 @@
  "online": "Online",
  "sCreated_at": "Server has been created at:",
  "members_permissions": "{member}'s permissions",
- "perms_list": "Permission list"}
+ "perms_list": "Permission list",
+ "closeVoting": "Close voting"}

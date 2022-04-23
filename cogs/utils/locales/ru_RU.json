@@ -11,4 +11,5 @@
  "online": "Онлайн",
  "sCreated_at": "Сервер создан:",
  "members_permissions": "Права участника {member}",
- "perms_list": "Список прав"}
+ "perms_list": "Список прав",
+ "closeVoting": "Закрыть голосование"}

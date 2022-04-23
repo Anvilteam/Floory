@@ -45,7 +45,7 @@ class Utils(commands.Cog):
             view.add_item(disnake.ui.Button(label=self.lang[locale]["closeVoting"], emoji="❌", custom_id="close_vote-"))
             await inter.send(embed=embed, view=view)
         else:
-            await inter.send("Произошла ошибка")
+            await inter.send("Произошла ошибка. Убедитесь что аргументы соответствуют правилам.")
 
     @utils.sub_command(description="получение информации о пользователе")
     async def member(self, inter: disnake.ApplicationCommandInteraction,

@@ -19,8 +19,8 @@ DEVELOPERS = (551439984255696908,
 
 
 def is_higher():
-    def predicate(inter):
-        check = inter.author.top_role > inter.filled_options["member"].top_role
+    def predicate(inter: disnake.ApplicationCommandInteraction):
+        check = inter.author.top_role > inter.filled_options["member"].top_role and inter.me.top_role > inter.filled_options["member"].top_role
         if not check:
             raise MemberHigherPermissions
         return True
