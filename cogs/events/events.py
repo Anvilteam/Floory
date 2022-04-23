@@ -64,7 +64,7 @@ class Events(commands.Cog):
         elif isinstance(error, MemberHigherPermissions):
             embed.add_field(name=f"```MemberHigherPermissions```",
                             value=self.lang[locale]["MemberHigherPermissions"])
-        elif isinstance(error, disnake.Forbidden):
+        elif isinstance(error, (disnake.errors.Forbidden, commands.errors.BotMissingPermissions)):
             embed.add_field(name=f"```Forbidden```",
                             value=self.lang[locale]["Forbidden"])
         else:

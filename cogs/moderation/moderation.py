@@ -84,7 +84,7 @@ class Moderation(commands.Cog):
         locale = await get_locale(inter.guild.id)
         author = inter.author
         await member.timeout(duration=0)
-        log = self.lang[locale]["moderation.unmute"].format(member=member, author=author)
+        log = self.lang[locale]["unmute"].format(member=member, author=author)
         await inter.send(log)
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 90), commands.BucketType.member)
