@@ -64,9 +64,15 @@ class Events(commands.Cog):
         elif isinstance(error, MemberHigherPermissions):
             embed.add_field(name=f"```MemberHigherPermissions```",
                             value=self.lang[locale]["MemberHigherPermissions"])
-        elif isinstance(error, (disnake.errors.Forbidden, commands.errors.BotMissingPermissions)):
+        elif isinstance(error, commands.BotMissingPermissions):
+            permissions = error.missing_permissions
+            embed_value = ''
+            for perm in permissions:
+                string = f"❌ {self.lang[locale][perm]}\n"
+                embed_value += string
             embed.add_field(name=f"```Forbidden```",
                             value=self.lang[locale]["Forbidden"])
+            embed.add_field(name=f"> {self.lang[locale]['requiredPerms']}", value=embed_value)
         else:
             embed.description = formatted
             logger.error("-----------------Неизвестная ошибка!----------------")
