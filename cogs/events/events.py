@@ -64,9 +64,15 @@ class Events(commands.Cog):
         elif isinstance(error, MemberHigherPermissions):
             embed.add_field(name=f"```MemberHigherPermissions```",
                             value=self.lang[locale]["MemberHigherPermissions"])
-        elif isinstance(error, disnake.Forbidden):
+        elif isinstance(error, commands.BotMissingPermissions):
             embed.add_field(name=f"```Forbidden```",
                             value=self.lang[locale]["Forbidden"])
+            permissions = error.missing_permissions
+            embed_value = ''
+            for perm in permissions:
+                string = f"❌ {self.lang[locale][perm]}\n"
+                embed_value += string
+            embed.add_field(name=f"> {self.lang[locale]['requiredPerms']}", value=embed_value)
         else:
             embed.description = formatted
             logger.error("-----------------Неизвестная ошибка!----------------")
@@ -112,7 +118,7 @@ class Events(commands.Cog):
                 else:
                     await inter.send(self.lang[locale]["alreadyVoted"], ephemeral=True)
             case "close_vote":
-                if inter.author.guild_permissions.manage_messages:
+                if inter.author.guild_permissions.manage_channels:
                     msg = inter.message
                     embed = msg.embeds[0]
                     fields = embed.fields

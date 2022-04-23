@@ -34,6 +34,7 @@ class Moderation(commands.Cog):
                 await channel.send(embed=embed)
 
     @commands.has_permissions(kick_members=True)
+    @commands.bot_has_permissions(moderate_members=True)
     @moderation.sub_command(description="выгнать участника с сервера")
     async def kick(self, inter: disnake.ApplicationCommandInteraction,
                    member: disnake.Member = commands.Param(description='пользователь'),
@@ -48,6 +49,7 @@ class Moderation(commands.Cog):
         await inter.send(log)
 
     @commands.has_permissions(ban_members=True)
+    @commands.bot_has_permissions(moderate_members=True)
     @moderation.sub_command(description="забанить участника")
     async def ban(self, inter: disnake.ApplicationCommandInteraction,
                   member: disnake.Member = commands.Param(description='пользователь'),
@@ -61,6 +63,7 @@ class Moderation(commands.Cog):
         await inter.send(log)
 
     @commands.has_permissions(moderate_members=True)
+    @commands.bot_has_permissions(moderate_members=True)
     @moderation.sub_command(description="мут участника")
     async def mute(self, inter: disnake.ApplicationCommandInteraction,
                    member: disnake.Member = commands.Param(description='пользователь'),
@@ -78,6 +81,7 @@ class Moderation(commands.Cog):
         await inter.send(log)
 
     @commands.has_permissions(moderate_members=True)
+    @commands.bot_has_permissions(moderate_members=True)
     @moderation.sub_command(description="размут участника")
     async def unmute(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member = commands.Param(description='пользователь')):
@@ -89,6 +93,7 @@ class Moderation(commands.Cog):
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 90), commands.BucketType.member)
     @commands.has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(manage_messages=True)
     @commands.slash_command(description="очистка чата на указанное кол-во сообщений")
     async def clear(self, inter: disnake.ApplicationCommandInteraction,
                     amount: int = commands.Param(default=1, description='кол-во сообщений (макс. 250)', lt=251),

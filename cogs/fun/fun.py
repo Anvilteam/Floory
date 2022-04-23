@@ -42,6 +42,7 @@ class Fun(commands.Cog):
         else:
             await inter.edit_original_message(content=self.lang[guild_locale]["tailWin"])
 
+    @commands.bot_has_permissions(external_emojis=True)
     @fun.sub_command(description="подбросить кубики")
     async def dice(self, inter: disnake.ApplicationCommandInteraction,
                    amount: int = commands.Param(default=2, description="кол-во кубиков", lt=7)):
@@ -71,6 +72,7 @@ class Fun(commands.Cog):
                         value=self.lang[guild_locale][result])
         await inter.send(embed=embed)
 
+    @commands.bot_has_permissions(external_emojis=True)
     @fun.sub_command(description="получить рандомный эмодзи")
     async def random_emoji(self, inter: disnake.ApplicationCommandInteraction):
         emoji = random.choice(self.client.emojis)

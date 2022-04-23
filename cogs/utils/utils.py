@@ -21,6 +21,7 @@ class Utils(commands.Cog):
     async def utils(self, inter):
         pass
 
+    @commands.has_permissions(moderate_members=True)
     @commands.dynamic_cooldown(cooldown, commands.BucketType.member)
     @utils.sub_command(description="создать голосование")
     async def voting(self, inter: disnake.ApplicationCommandInteraction,
@@ -29,7 +30,6 @@ class Utils(commands.Cog):
                      variants: str = commands.Param(desc="варианты голосов (через /)"),
                      image: disnake.Attachment = commands.Param(default=None, desc="картинка")):
         variants_ = list(filter(lambda e: e not in ("", " "), variants.split("/")))
-        print(variants_)
         if 1 < len(variants_) < 5 and len(set(variants_)) == len(variants_):
             locale = await get_locale(inter.guild_id)
             embed = disnake.Embed(title=name, description=description)
@@ -38,7 +38,6 @@ class Utils(commands.Cog):
             view = disnake.ui.View()
             for v in variants_:
                 custom_id = (random.choice(string.ascii_lowercase + string.digits) for _ in range(4))
-                print(custom_id)
                 embed.add_field(name=v, value="-------------------")
                 view.add_item(disnake.ui.Button(label=v + "|0",
                                                 custom_id=f"vote-{custom_id}"))
@@ -109,6 +108,7 @@ class Utils(commands.Cog):
         await inter.send(embed=embed, delete_after=30.0)
 
     @commands.has_permissions(manage_roles=True)
+    @commands.has_permissions(manage_roles=True)
     @utils.sub_command(description="получение прав конкретного пользователя")
     async def permissions(self, inter: disnake.ApplicationCommandInteraction,
                           member: disnake.Member = commands.Param(description='пользователь')):
@@ -130,6 +130,8 @@ class Utils(commands.Cog):
         embed.set_image(url=member.display_avatar.url)
         await inter.response.send_message(embed=embed)
 
+    @commands.bot_has_permissions(manage_emojis=True)
+    @commands.has_permissions(manage_emojis=True)
     @utils.sub_command(description="получить id всех эмодзи данного сервера")
     async def get_emojis(self, inter: disnake.ApplicationCommandInteraction):
         emojis = inter.guild.emojis
