@@ -6,6 +6,8 @@
  "tmCubes": "Too many dices (Maximum 5)",
 
  "mystic_ball": "Mystical ball",
+ "true": "Yes",
+ "false": "No",
  "maybe": "Maybe",
  "asks": "Asks: ",
  "answer": "An answer of a magical sphere: "}
