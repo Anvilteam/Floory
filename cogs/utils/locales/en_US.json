@@ -1,7 +1,7 @@
 {"guild": "Server",
  "true": "Yes",
  "false": "No",
- "statistics": "Statistics",
+ "statistics": "Statistics: ",
  "real_name": "Real nickname:",
  "uCreated_at": "Account has been created at:",
 
