@@ -104,7 +104,7 @@ class Moderation(commands.Cog):
     @commands.bot_has_permissions(manage_messages=True)
     @commands.slash_command(description="очистка чата на указанное кол-во сообщений")
     async def clear(self, inter: disnake.ApplicationCommandInteraction,
-                    amount: int = commands.Param(default=1, description='кол-во сообщений (макс. 250)', lt=251),
+                    amount: int = commands.Param(default=1, description='кол-во сообщений (макс. 250)', gt=1, lt=251),
                     member: disnake.Member = commands.Param(default=None,
                                                             description='сообщения какого пользователя надо очистить')):
         await inter.response.defer()
