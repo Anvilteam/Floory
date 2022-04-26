@@ -45,7 +45,7 @@ class Fun(commands.Cog):
     @commands.bot_has_permissions(external_emojis=True)
     @fun.sub_command(description="подбросить кубики")
     async def dice(self, inter: disnake.ApplicationCommandInteraction,
-                   amount: int = commands.Param(default=2, description="кол-во кубиков", lt=7)):
+                   amount: int = commands.Param(default=2, description="кол-во кубиков", le=6)):
         guild_locale = await get_locale(inter.guild.id)
         waiting = 0.5
 

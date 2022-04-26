@@ -27,11 +27,12 @@ class Moderation(commands.Cog):
             await gd.set_all()
             if gd.logging == 'true' and gd.logs_channel != 'None':
                 channel = inter.guild.get_channel(int(gd.logs_channel))
-                embed = disnake.Embed(title=self.lang[gd.locale]["mod_logs"].format(member=inter.filled_options['member'],
-                                                                                    author=inter.author),
-                                      color=COLORS["default"])
-                embed.add_field(self.lang[gd.locale]["command"], f"> {inter.application_command.name}")
-                await channel.send(embed=embed)
+                if channel is not None and channel.overwrites_for(inter.guild.me.top_role).send_messages:
+                    embed = disnake.Embed(title=self.lang[gd.locale]["mod_logs"].format(member=inter.filled_options['member'],
+                                                                                        author=inter.author),
+                                          color=COLORS["default"])
+                    embed.add_field(self.lang[gd.locale]["command"], f"> {inter.application_command.name}")
+                    await channel.send(embed=embed)
 
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
