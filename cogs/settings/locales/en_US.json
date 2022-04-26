@@ -2,7 +2,7 @@
  "newsOff": "You have successfully turned news and announcements off",
  "newsChannelReq": "Before that, you need to select a channel for the news, by typing /config set-news-channel while you are in the corresponding channel",
  "alreadyCreated": "News are already turned on",
- "newsNotCreatedYet": "News not enabled yet",
+ "notCreatedYet": "News not enabled yet",
  "setNewsChannel": "A channel for the news is selected successfully",
 
 

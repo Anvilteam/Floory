@@ -67,7 +67,7 @@ def news_status(webhooks: list[disnake.Webhook]) -> tuple:
     news = None
     is_created = False
     for i in webhooks:
-        if i.type == disnake.WebhookType.channel_follower and i.source_channel.id == 917017050495471648:
+        if i.type == disnake.WebhookType.channel_follower and i.source_channel.id == 917015010801238037:
             is_created = True
             news = i
             break
