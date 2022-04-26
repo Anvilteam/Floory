@@ -30,11 +30,18 @@ class Settings(commands.Cog):
             await gd.set_all()
             if gd.logging == 'true' and gd.logs_channel != 'None':
                 channel = inter.guild.get_channel(int(gd.logs_channel))
-                if channel is not None and channel.overwrites_for(inter.guild.me.top_role).send_messages:
-                    embed = disnake.Embed(title=self.lang[gd.locale]["settings_logs"].format(author=inter.author))
-                    options = map(lambda k: f"{k}:{inter.filled_options[k]}", inter.filled_options.keys())
-                    embed.description = f"`/{inter.application_command.qualified_name} " + " ".join(options) + '`'
-                    await channel.send(embed=embed)
+                if channel is not None:
+                    check = False
+                    match channel.overwrites_for(inter.guild.me.top_role).send_messages:
+                        case True:
+                            check = True
+                        case None:
+                            check = True if inter.guild.me.guild_permissions.send_messages else False
+                    if check:
+                        embed = disnake.Embed(title=self.lang[gd.locale]["settings_logs"].format(author=inter.author))
+                        options = map(lambda k: f"{k}:{inter.filled_options[k]}", inter.filled_options.keys())
+                        embed.description = f"`/{inter.application_command.qualified_name} " + " ".join(options) + '`'
+                        await channel.send(embed=embed)
 
     @settings.error
     async def settings_errors(self, inter, error):
