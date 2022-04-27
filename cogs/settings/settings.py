@@ -32,11 +32,10 @@ class Settings(commands.Cog):
                 channel = inter.guild.get_channel(int(gd.logs_channel))
                 if channel is not None:
                     check = False
-                    match channel.overwrites_for(inter.guild.me.top_role).send_messages:
-                        case True:
-                            check = True
-                        case None:
-                            check = True if inter.guild.me.guild_permissions.send_messages else False
+                    if True in (channel.overwrites_for(inter.guild.me.top_role).send_messages,
+                                channel.overwrites_for(
+                                    inter.me).send_messages) or inter.guild.me.guild_permissions.send_messages:
+                        check = True
                     if check:
                         embed = disnake.Embed(title=self.lang[gd.locale]["settings_logs"].format(author=inter.author))
                         options = map(lambda k: f"{k}:{inter.filled_options[k]}", inter.filled_options.keys())

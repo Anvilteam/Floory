@@ -29,11 +29,9 @@ class Moderation(commands.Cog):
                 channel = inter.guild.get_channel(int(gd.logs_channel))
                 if channel is not None:
                     check = False
-                    match channel.overwrites_for(inter.guild.me.top_role).send_messages:
-                        case True:
-                            check = True
-                        case None:
-                            check = True if inter.guild.me.guild_permissions.send_messages else False
+                    if True in (channel.overwrites_for(inter.guild.me.top_role).send_messages,
+                                channel.overwrites_for(inter.guild.me)) or inter.guild.me.guild_permissions.send_messages:
+                        check = True
                     if check:
                         embed = disnake.Embed(title=self.lang[gd.locale]["mod_logs"].format(member=inter.filled_options['member'],
                                                                                             author=inter.author),
@@ -75,10 +73,10 @@ class Moderation(commands.Cog):
     @moderation.sub_command(description="мут участника")
     async def mute(self, inter: disnake.ApplicationCommandInteraction,
                    member: disnake.Member = commands.Param(description='пользователь'),
-                   seconds: float = 0,
-                   minutes: float = 1,
-                   hours: int = 0,
-                   days: int = 0,
+                   seconds: float = commands.Param(0, gt=1, le=60),
+                   minutes: float = commands.Param(1, gt=1, le=60),
+                   hours: int = commands.Param(0, gt=1, le=24),
+                   days: int = commands.Param(0, gt=1, le=14),
                    reason: str = commands.Param(default=None, description='причина')):
         locale = await get_locale(inter.guild.id)
         author = inter.author
