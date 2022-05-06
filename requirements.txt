@@ -1,6 +1,7 @@
 disnake==2.4.0
 loguru==0.6.0
 PyYAML==6.0
+gpytranslate==1.4.0
 aiomysql==0.0.22
 aioredis==2.0.1
 progress==1.6

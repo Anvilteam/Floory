@@ -8,6 +8,8 @@ from core.tools import perms_to_dict, translated, dev_cooldown, tes_col
 from core.guild_data import get_locale
 from core.cooldown import DynamicCooldown
 
+from gpytranslate import Translator
+
 __file__ = "cogs/utils/locales"
 cooldown = DynamicCooldown(1, 45)
 
@@ -129,6 +131,14 @@ class Utils(commands.Cog):
         embed = disnake.Embed(title=member, color=0x3ef0a9)
         embed.set_image(url=member.display_avatar.url)
         await inter.response.send_message(embed=embed)
+
+    @commands.message_command(name="Translate")
+    async def translate(self, inter: disnake.ApplicationCommandInteraction):
+        locale = inter.locale
+        t = Translator()
+        message = await inter.original_message()
+        phrase = await t.translate(text=message.content, targetlang=locale)
+        await inter.send(f"{message.content} -> {phrase}")
 
     @commands.bot_has_permissions(manage_emojis=True)
     @commands.has_permissions(manage_emojis=True)
