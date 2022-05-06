@@ -28,7 +28,8 @@ logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", le
 logger.add("logs/floory_{time}.log", enqueue=True)
 
 # Загрузка конфигурации и клиента
-cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
+with open('config.yaml', 'r', encoding="UTF-8") as f:
+    cfg = yaml.safe_load(f)
 logger.info("Запуск disnake..")
 
 client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())

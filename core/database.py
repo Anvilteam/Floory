@@ -6,7 +6,8 @@ import aioredis
 from loguru import logger
 from typing import Literal
 
-cfg = yaml.safe_load(open('config.yaml', 'r'))
+with open('config.yaml', 'r', encoding="UTF-8") as f:
+    cfg = yaml.safe_load(f)
 loop = asyncio.get_event_loop()
 
 redis_client = aioredis.from_url(url="redis://127.0.0.1", port=6379, db=0, decode_responses=True)

@@ -17,7 +17,8 @@ emojis = {1: 946031293655842856,
           5: 946031813544005642,
           6: 946031836637843476}
 
-cfg = yaml.safe_load(open('config.yaml', 'r', encoding="UTF-8"))
+with open('config.yaml', 'r', encoding="UTF-8") as f:
+    cfg = yaml.safe_load(f)
 
 
 @translated(__file__)
