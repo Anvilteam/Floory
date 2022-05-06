@@ -138,7 +138,7 @@ class Utils(commands.Cog):
         t = Translator()
         message = await inter.original_message()
         phrase = await t.translate(text=message.content, targetlang=locale)
-        await inter.send(f"{message.content} -> {phrase}")
+        await inter.channel.send(f"{message.content} -> {phrase}")
 
     @commands.bot_has_permissions(manage_emojis=True)
     @commands.has_permissions(manage_emojis=True)
