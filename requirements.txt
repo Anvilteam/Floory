@@ -1,4 +1,4 @@
-git+https://github.com/DisnakeDev/disnake.git
+disnake==2.5.0
 loguru==0.6.0
 PyYAML==6.0
 gpytranslate==1.4.0
