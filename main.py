@@ -32,10 +32,10 @@ with open('config.yaml', 'r', encoding="UTF-8") as f:
     cfg = yaml.safe_load(f)
 logger.info("Запуск disnake..")
 
-client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
-#                      test_guilds=test_guilds,
-#                      sync_commands_debug=True,
-#                      sync_permissions=True)
+client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all(),
+                      test_guilds=test_guilds,
+                      sync_commands_debug=True,
+                      sync_permissions=True)
 
 
 @client.event

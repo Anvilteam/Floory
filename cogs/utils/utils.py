@@ -137,8 +137,17 @@ class Utils(commands.Cog):
         locale = inter.locale
         t = Translator()
         message = inter.target
+        await t.detect()
         phrase = await t.translate(text=message.content, targetlang=locale)
-        await inter.channel.send(f"{message.content} -> {phrase.text}")
+        print(phrase)
+        await inter.send(f"{message.content} -> {phrase.text}")
+
+    @commands.message_command(name="Перевести на английский")
+    async def to_english(self, inter: disnake.ApplicationCommandInteraction):
+        t = Translator()
+        message = inter.target
+        phrase = await t.translate(text=message.content, targetlang="en_US")
+        await inter.send(f"{message.content} -> {phrase.text}")
 
     @commands.bot_has_permissions(manage_emojis=True)
     @commands.has_permissions(manage_emojis=True)
