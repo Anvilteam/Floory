@@ -23,7 +23,7 @@ class Utils(commands.Cog):
     async def utils(self, inter):
         pass
 
-    @commands.has_permissions(moderate_members=True)
+    @commands.has_permissions(manage_messages=True)
     @commands.dynamic_cooldown(cooldown, commands.BucketType.member)
     @utils.sub_command(description="создать голосование")
     async def voting(self, inter: disnake.ApplicationCommandInteraction,
