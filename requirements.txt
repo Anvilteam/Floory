@@ -1,4 +1,4 @@
-disnake==2.4.0
+pip install git+https://github.com/DisnakeDev/disnake.git
 loguru==0.6.0
 PyYAML==6.0
 gpytranslate==1.4.0
