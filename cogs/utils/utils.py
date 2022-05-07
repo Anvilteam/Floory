@@ -110,7 +110,7 @@ class Utils(commands.Cog):
         await inter.send(embed=embed, delete_after=30.0)
 
     @commands.has_permissions(manage_roles=True)
-    @commands.has_permissions(manage_roles=True)
+    @commands.bot_has_permissions(manage_roles=True)
     @utils.sub_command(description="получение прав конкретного пользователя")
     async def permissions(self, inter: disnake.ApplicationCommandInteraction,
                           member: disnake.Member = commands.Param(description='пользователь')):
@@ -132,22 +132,21 @@ class Utils(commands.Cog):
         embed.set_image(url=member.display_avatar.url)
         await inter.response.send_message(embed=embed)
 
-    @commands.message_command(name="Translate")
+    @commands.message_command(name="Перевести")
     async def translate(self, inter: disnake.ApplicationCommandInteraction):
         locale = inter.locale
         t = Translator()
         message = inter.target
-        await t.detect()
-        phrase = await t.translate(text=message.content, targetlang=locale)
-        print(phrase)
-        await inter.send(f"{message.content} -> {phrase.text}")
+        lang = await t.detect(message.content)
+        phrase = await t.translate(text=message.content, targetlang=locale.value)
+        await inter.send(f"{message.content} :flag_{lang}: -> {phrase.text} :flag_{locale}:")
 
     @commands.message_command(name="Перевести на английский")
     async def to_english(self, inter: disnake.ApplicationCommandInteraction):
         t = Translator()
         message = inter.target
         phrase = await t.translate(text=message.content, targetlang="en_US")
-        await inter.send(f"{message.content} -> {phrase.text}")
+        await inter.send(f"{message.content} -> {phrase.text} :flag_gb:")
 
     @commands.bot_has_permissions(manage_emojis=True)
     @commands.has_permissions(manage_emojis=True)
