@@ -3,7 +3,7 @@ import logging
 import os
 from disnake.ext import commands
 from core.tools import is_bot_developer, COLORS
-from core.database import cur, redis_client
+from core.guild_data import GuildData
 from core.exceptions import *
 from loguru import logger
 
@@ -24,8 +24,8 @@ class Dev(commands.Cog):
 
     @dev.sub_command(description="получить кэш гильдии")
     async def get_cache(self, inter: disnake.ApplicationCommandInteraction):
-        cache = (await redis_client.lrange(inter.guild.id, 0, 2))[::-1]
-        await inter.send(' '.join(cache))
+        cache = await GuildData.from_cache(inter.guild_id)
+        await inter.send(f"{cache.logging}, {cache.logs_channel}")
 
 """    @dev.sub_command(description="перезагрузить один или все коги")
     async def reload_cog(self, inter: disnake.ApplicationCommandInteraction,

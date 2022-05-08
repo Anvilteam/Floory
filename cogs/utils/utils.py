@@ -4,8 +4,7 @@ import random
 from disnake.ext import commands
 from disnake.ext.commands import Param
 
-from core.tools import perms_to_dict, translated, dev_cooldown, tes_col
-from core.guild_data import get_locale
+from core.tools import perms_to_dict, translated, dev_cooldown
 from core.cooldown import DynamicCooldown
 
 from gpytranslate import Translator
@@ -33,7 +32,7 @@ class Utils(commands.Cog):
                      image: disnake.Attachment = commands.Param(default=None, desc="картинка")):
         variants_ = list(filter(lambda e: e not in ("", " "), variants.split("/")))
         if 1 < len(variants_) < 5 and len(set(variants_)) == len(variants_):
-            locale = await get_locale(inter.guild_id)
+            locale = inter.locale.value
             embed = disnake.Embed(title=name, description=description)
             if image is not None:
                 embed.set_image(image.url)
@@ -51,7 +50,7 @@ class Utils(commands.Cog):
     @utils.sub_command(description="получение информации о пользователе")
     async def member(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member = commands.Param(description='пользователь')):
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale.value
         guild_owner = inter.guild.owner
         name = member.name
         created_at = member.created_at.strftime('%Y.%m.%d %H:%M:%S')
@@ -77,7 +76,7 @@ class Utils(commands.Cog):
 
     @utils.sub_command(name="server", description="информация о сервере")
     async def server(self, inter: disnake.ApplicationCommandInteraction):
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale.value
         guild = inter.guild
         icon = guild.icon
         owner = guild.owner
@@ -115,7 +114,7 @@ class Utils(commands.Cog):
     async def permissions(self, inter: disnake.ApplicationCommandInteraction,
                           member: disnake.Member = commands.Param(description='пользователь')):
         emojies = {0: '❌', 1: '✅'}
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale.value
         member_perms = perms_to_dict(member.guild_permissions)
         # '❌|✅', 'permission translate', 'new line'
         embed_value = "".join(

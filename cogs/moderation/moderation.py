@@ -3,7 +3,7 @@ import datetime
 from disnake.ext import commands
 from core.tools import is_higher, translated, COLORS
 from core.cooldown import DynamicCooldown
-from core.guild_data import get_locale, GuildData
+from core.guild_data import GuildData
 from core.exceptions import *
 
 __file__ = "cogs/moderation/locales"
@@ -23,20 +23,22 @@ class Moderation(commands.Cog):
     @moderation.after_invoke
     async def mod_logs(self, inter: disnake.ApplicationCommandInteraction):
         if not inter.command_failed:
-            gd = GuildData(inter.guild_id)
-            await gd.set_all()
+            gd = await GuildData.from_cache(inter.guild_id)
+            locale = inter.locale.value
             if gd.logging == 'true' and gd.logs_channel != 'None':
                 channel = inter.guild.get_channel(int(gd.logs_channel))
                 if channel is not None:
                     check = False
                     if True in (channel.overwrites_for(inter.guild.me.top_role).send_messages,
-                                channel.overwrites_for(inter.guild.me)) or inter.guild.me.guild_permissions.send_messages:
+                                channel.overwrites_for(
+                                    inter.guild.me)) or inter.guild.me.guild_permissions.send_messages:
                         check = True
                     if check:
-                        embed = disnake.Embed(title=self.lang[gd.locale]["mod_logs"].format(member=inter.filled_options['member'],
-                                                                                            author=inter.author),
-                                              color=COLORS["default"])
-                        embed.add_field(self.lang[gd.locale]["command"], f"> {inter.application_command.name}")
+                        embed = disnake.Embed(
+                            title=self.lang[locale]["mod_logs"].format(member=inter.filled_options['member'],
+                                                                       author=inter.author),
+                            color=COLORS["default"])
+                        embed.add_field(self.lang[locale]["command"], f"> {inter.application_command.name}")
                         await channel.send(embed=embed)
 
     @commands.has_permissions(kick_members=True)
@@ -45,7 +47,7 @@ class Moderation(commands.Cog):
     async def kick(self, inter: disnake.ApplicationCommandInteraction,
                    member: disnake.Member = commands.Param(description='пользователь'),
                    reason: str = commands.Param(default=None, description='причина')):
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale.value
         author = inter.author
         reason_ = reason or self.lang[locale]["reasonIsNone"]
         await inter.channel.purge(limit=1)
@@ -60,7 +62,7 @@ class Moderation(commands.Cog):
     async def ban(self, inter: disnake.ApplicationCommandInteraction,
                   member: disnake.Member = commands.Param(description='пользователь'),
                   reason: str = commands.Param(default=None, description='причина')):
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale.value
         author = inter.author
         reason_ = reason or self.lang[locale]["reasonIsNone"]
         await member.ban(reason=reason)
@@ -78,7 +80,7 @@ class Moderation(commands.Cog):
                    hours: int = commands.Param(0, gt=1, le=24),
                    days: int = commands.Param(0, gt=1, le=14),
                    reason: str = commands.Param(default=None, description='причина')):
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale.value
         author = inter.author
         timeout = datetime.timedelta(seconds=seconds, minutes=minutes, hours=hours, days=days)
         reason_ = reason or self.lang[locale]["reasonIsNone"]
@@ -91,7 +93,7 @@ class Moderation(commands.Cog):
     @moderation.sub_command(description="размут участника")
     async def unmute(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member = commands.Param(description='пользователь')):
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale.value
         author = inter.author
         await member.timeout(duration=0)
         log = self.lang[locale]["unmute"].format(member=member, author=author)

@@ -5,7 +5,6 @@ import yaml
 from disnake.ext import commands
 from core.tools import translated
 from core.cooldown import DynamicCooldown
-from core.guild_data import get_locale
 from loguru import logger
 
 __file__ = "cogs/fun/locales"
@@ -33,7 +32,7 @@ class Fun(commands.Cog):
 
     @fun.sub_command(description="подбросить монетку")
     async def coin(self, inter: disnake.ApplicationCommandInteraction):
-        guild_locale = await get_locale(inter.guild.id)
+        guild_locale = inter.locale
         variants = ['орел', 'решка']
         coin_choice = random.choice(variants)
         await inter.response.send_message(self.lang[guild_locale]["toss"])
@@ -47,7 +46,7 @@ class Fun(commands.Cog):
     @fun.sub_command(description="подбросить кубики")
     async def dice(self, inter: disnake.ApplicationCommandInteraction,
                    amount: int = commands.Param(default=2, description="кол-во кубиков", gt=1, le=6)):
-        guild_locale = await get_locale(inter.guild.id)
+        guild_locale = inter.locale
         waiting = 0.5
 
         await inter.send(self.lang[guild_locale]["tossingCubes"])
@@ -63,7 +62,7 @@ class Fun(commands.Cog):
     @fun.sub_command(description="спросите магический шар о чём угодно")
     async def mystical_ball(self, inter: disnake.ApplicationCommandInteraction,
                             query: str = commands.Param(description="Ваш вопрос")):
-        guild_locale = await get_locale(inter.guild.id)
+        guild_locale = inter.locale
         variant = ['true', 'false', 'maybe']
         result = random.choice(variant)
         embed = disnake.Embed(title=f"🔮 - {self.lang[guild_locale]['mystic_ball']}",

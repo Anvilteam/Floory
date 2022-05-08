@@ -12,7 +12,6 @@ from core.database import cur, redis_client
 
 from progress.bar import Bar
 from loguru import logger
-print(disnake.__version__)
 
 test_guilds = [737351356079145002,  # FallenSky
                906795717643882496,  # FlooryHome
@@ -30,7 +29,7 @@ logger.add("logs/floory_{time}.log", enqueue=True)
 # Загрузка конфигурации и клиента
 with open('config.yaml', 'r', encoding="UTF-8") as f:
     cfg = yaml.safe_load(f)
-logger.info("Запуск disnake..")
+logger.info(f"Запуск disnake {disnake.__version__}..")
 
 client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
 #                      test_guilds=test_guilds,
@@ -60,7 +59,8 @@ async def load_cache():
             if len(data) == 0:
                 await new_guild(guild.id)
             else:
-                await redis_client.lpush(guild.id, *data[1:-1], str(data[3]))
+                await redis_client.hset(guild.id, "logging", data[1])
+                await redis_client.hset(guild.id, "logs_channel", str(data[2]))
             bar.next()
 
 

@@ -8,7 +8,6 @@ from loguru import logger
 
 from core.tools import translated, COLORS
 from core.cooldown import DynamicCooldown
-from core.guild_data import get_locale
 
 __file__ = "cogs/main/locales"
 with open('config.yaml', 'r', encoding="UTF-8") as f:
@@ -25,7 +24,7 @@ class Main(commands.Cog):
     async def status(self,
                      inter: disnake.ApplicationCommandInteraction):
         splash = random.choice(cfg["bot"]["status_splashes"])
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale
         latency = self.client.latency
         guilds = len(self.client.guilds)
         cmds = len(self.client.slash_commands)
@@ -39,7 +38,7 @@ class Main(commands.Cog):
         embed.add_field(name="💻 " + self.lang[locale]["owners"], value=f"```Xemay#9586\nRedWolf#5064\nD3st0nλ#5637```",
                         inline=False)
         embed.add_field(name="<:github:945683293666439198> Github", value="[Тык](https://github.com/Anvilteam/Floory)")
-        embed.add_field(name="🎲 Version", value="```0.3 beta```", inline=False)
+        embed.add_field(name="🎲 Version", value="```0.4.1 beta```", inline=False)
         embed.set_thumbnail(file=disnake.File("logo.png"))
         v = disnake.ui.View()
         v.add_item(disnake.ui.Button(label="Сервер поддержки", url="https://discord.gg/3KG3ue66rY"))

@@ -18,9 +18,20 @@ DEVELOPERS = (551439984255696908,
               565172681532506131)
 
 
+class Localization:
+    def __init__(self, locale: dict):
+        self.locale = locale
+
+    def __getitem__(self, item: str) -> dict:
+        if item in ("en_GB", "en_US"):
+            return self.locale["en_US"]
+        return self.locale[item] if item in ("ru",) else self.locale["en_US"]
+
+
 def is_higher():
     def predicate(inter: disnake.ApplicationCommandInteraction):
-        check = inter.author.top_role > inter.filled_options["member"].top_role and inter.me.top_role > inter.filled_options["member"].top_role
+        check = inter.author.top_role > inter.filled_options["member"].top_role and inter.me.top_role > \
+                inter.filled_options["member"].top_role
         if not check:
             raise MemberHigherPermissions
         return True
@@ -49,16 +60,10 @@ def is_bot_developer():
 
 
 def dev_cooldown(msg: disnake.Message) -> commands.Cooldown:
-    print(type(msg))
-    print(msg)
     if msg.author.id in DEVELOPERS:
         return commands.Cooldown(1, 90)
     else:
         return commands.Cooldown(1, 30)
-
-
-def tes_col(msg):
-    return commands.Cooldown(1, 150)
 
 
 def news_status(webhooks: list[disnake.Webhook]) -> tuple:
@@ -104,7 +109,7 @@ def translated(*paths):
                     translations[k] = {}
                 translations[k] = translations[k] | multi_lang[k]
 
-        cls.lang = translations
+        cls.lang = Localization(translations)
         return cls
 
     return wraps

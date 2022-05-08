@@ -4,7 +4,7 @@ from disnake.ext import commands
 from loguru import logger
 
 from core.tools import translated, COLORS, DEVELOPERS
-from core.guild_data import new_guild, get_locale
+from core.guild_data import new_guild
 from core.database import cur, redis_client
 from core.exceptions import MemberHigherPermissions
 
@@ -21,7 +21,7 @@ class Events(commands.Cog):
         await new_guild(guild.id)
         logger.info(f"Новая гильдия! {guild.name}-{guild.id}")
         channel = guild.system_channel
-        locale = "ru_RU"
+        locale = "ru"
 
         embed = disnake.Embed(title=self.lang[locale]["inviting_title"],
                               description=self.lang[locale]["inviting_description"],
@@ -42,7 +42,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_slash_command_error(self, inter: disnake.ApplicationCommandInteraction, error):
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale
         formatted = f"{error}|{inter.application_command.name}"
         embed = disnake.Embed(title=self.lang[locale]["error"],
                               color=COLORS["error"])
@@ -91,7 +91,7 @@ class Events(commands.Cog):
 
     @commands.Cog.listener()
     async def on_button_click(self, inter: disnake.MessageInteraction):
-        locale = await get_locale(inter.guild.id)
+        locale = inter.locale
         match inter.component.custom_id.split('-')[0]:
             case "vote":
                 msg = inter.message
