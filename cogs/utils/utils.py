@@ -138,7 +138,8 @@ class Utils(commands.Cog):
         message = inter.target
         lang = await t.detect(message.content)
         phrase = await t.translate(text=message.content, targetlang=locale.value)
-        await inter.send(f"{message.content} :flag_{lang}: -> {phrase.text} :flag_{locale}:")
+        await inter.send(f"{message.content} :flag_{lang.replace('en_US', 'gb').replace('en_UK', 'gb')}: -> {phrase.text}"
+                         f" :flag_{locale.value.replace('en_US', 'gb').replace('en_UK', 'gb')}:")
 
     @commands.message_command(name="Перевести на английский")
     async def to_english(self, inter: disnake.ApplicationCommandInteraction):

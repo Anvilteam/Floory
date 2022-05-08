@@ -24,9 +24,9 @@ class Localization:
 
     def __getitem__(self, item: str) -> dict:
         print(item)
-        if item in ("en_GB", "en_US"):
-            return self.locale["en_US"]
-        return self.locale[item] if item in ("ru",) else self.locale["en_US"]
+        if item in ("ru", ):
+            return self.locale[item]
+        return self.locale["en_US"]
 
 
 def is_higher():
