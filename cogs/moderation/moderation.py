@@ -24,7 +24,7 @@ class Moderation(commands.Cog):
     async def mod_logs(self, inter: disnake.ApplicationCommandInteraction):
         if not inter.command_failed:
             gd = await GuildData.from_cache(inter.guild_id)
-            locale = inter.locale.value
+            locale = inter.locale
             if gd.logging == 'true' and gd.logs_channel != 'None':
                 channel = inter.guild.get_channel(int(gd.logs_channel))
                 if channel is not None:
@@ -47,7 +47,7 @@ class Moderation(commands.Cog):
     async def kick(self, inter: disnake.ApplicationCommandInteraction,
                    member: disnake.Member = commands.Param(description='пользователь'),
                    reason: str = commands.Param(default=None, description='причина')):
-        locale = inter.locale.value
+        locale = inter.locale
         author = inter.author
         reason_ = reason or self.lang[locale]["reasonIsNone"]
         await inter.channel.purge(limit=1)
@@ -62,7 +62,7 @@ class Moderation(commands.Cog):
     async def ban(self, inter: disnake.ApplicationCommandInteraction,
                   member: disnake.Member = commands.Param(description='пользователь'),
                   reason: str = commands.Param(default=None, description='причина')):
-        locale = inter.locale.value
+        locale = inter.locale
         author = inter.author
         reason_ = reason or self.lang[locale]["reasonIsNone"]
         await member.ban(reason=reason)
@@ -80,7 +80,7 @@ class Moderation(commands.Cog):
                    hours: int = commands.Param(0, gt=1, le=24),
                    days: int = commands.Param(0, gt=1, le=14),
                    reason: str = commands.Param(default=None, description='причина')):
-        locale = inter.locale.value
+        locale = inter.locale
         author = inter.author
         timeout = datetime.timedelta(seconds=seconds, minutes=minutes, hours=hours, days=days)
         reason_ = reason or self.lang[locale]["reasonIsNone"]
@@ -93,7 +93,7 @@ class Moderation(commands.Cog):
     @moderation.sub_command(description="размут участника")
     async def unmute(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member = commands.Param(description='пользователь')):
-        locale = inter.locale.value
+        locale = inter.locale
         author = inter.author
         await member.timeout(duration=0)
         log = self.lang[locale]["unmute"].format(member=member, author=author)

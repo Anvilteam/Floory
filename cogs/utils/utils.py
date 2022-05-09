@@ -32,7 +32,7 @@ class Utils(commands.Cog):
                      image: disnake.Attachment = commands.Param(default=None, desc="картинка")):
         variants_ = list(filter(lambda e: e not in ("", " "), variants.split("/")))
         if 1 < len(variants_) < 5 and len(set(variants_)) == len(variants_):
-            locale = inter.locale.value
+            locale = inter.locale
             embed = disnake.Embed(title=name, description=description)
             if image is not None:
                 embed.set_image(image.url)
@@ -50,7 +50,7 @@ class Utils(commands.Cog):
     @utils.sub_command(description="получение информации о пользователе")
     async def member(self, inter: disnake.ApplicationCommandInteraction,
                      member: disnake.Member = commands.Param(description='пользователь')):
-        locale = inter.locale.value
+        locale = inter.locale
         guild_owner = inter.guild.owner
         name = member.name
         created_at = member.created_at.strftime('%Y.%m.%d %H:%M:%S')
@@ -76,7 +76,7 @@ class Utils(commands.Cog):
 
     @utils.sub_command(name="server", description="информация о сервере")
     async def server(self, inter: disnake.ApplicationCommandInteraction):
-        locale = inter.locale.value
+        locale = inter.locale
         guild = inter.guild
         icon = guild.icon
         owner = guild.owner
@@ -114,7 +114,7 @@ class Utils(commands.Cog):
     async def permissions(self, inter: disnake.ApplicationCommandInteraction,
                           member: disnake.Member = commands.Param(description='пользователь')):
         emojies = {0: '❌', 1: '✅'}
-        locale = inter.locale.value
+        locale = inter.locale
         member_perms = perms_to_dict(member.guild_permissions)
         # '❌|✅', 'permission translate', 'new line'
         embed_value = "".join(

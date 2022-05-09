@@ -33,7 +33,7 @@ class Settings(commands.Cog):
                                     inter.me).send_messages) or inter.guild.me.guild_permissions.send_messages:
                         check = True
                     if check:
-                        embed = disnake.Embed(title=self.lang[inter.locale.value]["settings_logs"].format(
+                        embed = disnake.Embed(title=self.lang[inter.locale]["settings_logs"].format(
                             author=inter.author))
                         options = map(lambda k: f"{k}:{inter.filled_options[k]}", inter.filled_options.keys())
                         embed.description = f"`/{inter.application_command.qualified_name} " + " ".join(options) + '`'
@@ -42,7 +42,7 @@ class Settings(commands.Cog):
     @settings.error
     async def settings_errors(self, inter, error):
         if isinstance(error, NotGuildOwner):
-            locale = inter.locale.value
+            locale = inter.locale
             await inter.send(self.lang[locale]["NotGuildOwner"])
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 60), commands.BucketType.member)
@@ -53,7 +53,7 @@ class Settings(commands.Cog):
     @news.sub_command(description="включить новости")
     async def news_on(self, inter: disnake.ApplicationCommandInteraction,
                       channel: disnake.TextChannel = commands.Param(description="канал куда будут поступать новости")):
-        locale = inter.locale.value
+        locale = inter.locale
         webhooks = await inter.guild.webhooks()
         is_created, news = core.tools.news_status(webhooks)
         if not is_created:
@@ -66,7 +66,7 @@ class Settings(commands.Cog):
 
     @news.sub_command(description="выключить новости")
     async def news_off(self, inter: disnake.ApplicationCommandInteraction):
-        locale = inter.locale.value
+        locale = inter.locale
         webhooks = await inter.guild.webhooks()
         is_created, news = core.tools.news_status(webhooks)
         if is_created:
@@ -78,7 +78,7 @@ class Settings(commands.Cog):
     @settings.sub_command(description="изменить канал для новостей")
     async def set_news_channel(self, inter: disnake.ApplicationCommandInteraction,
                                channel: disnake.TextChannel = Param(description="канал куда будут поступать новости")):
-        locale = inter.locale.value
+        locale = inter.locale
         webhooks = await inter.guild.webhooks()
         is_created, news = core.tools.news_status(webhooks)
         if not is_created:
@@ -94,7 +94,7 @@ class Settings(commands.Cog):
 
     @logging.sub_command(description="включить логирование")
     async def logs_on(self, inter: disnake.ApplicationCommandInteraction):
-        locale = inter.locale.value
+        locale = inter.locale
         guild_data = await GuildData.from_cache(inter.guild_id)
         if guild_data.logging == 'false':
             await cur("query", f"UPDATE `guilds` SET `logging` = 'true' WHERE `guild` = {inter.guild.id}")
@@ -105,7 +105,7 @@ class Settings(commands.Cog):
 
     @logging.sub_command(description="выключить логирование")
     async def logs_off(self, inter: disnake.ApplicationCommandInteraction):
-        locale = inter.locale.value
+        locale = inter.locale
         guild_data = await GuildData.from_cache(inter.guild_id)
         if guild_data.logging == 'true':
             await cur("query", f"UPDATE `guilds` SET `logging` = 'false' WHERE `guild` = {inter.guild.id}")
@@ -117,7 +117,7 @@ class Settings(commands.Cog):
     @logging.sub_command(description="изменить канал для логов")
     async def set_channel(self, inter: disnake.ApplicationCommandInteraction,
                           channel: disnake.TextChannel = commands.Param(description="канал куда будут поступать логи")):
-        locale = inter.locale.value
+        locale = inter.locale
         await cur("query", f"UPDATE `guilds` SET `logs-channel` = {channel.id} WHERE `guild` = {inter.guild.id}")
         await refresh(inter.guild_id, logs_channel=channel.id)
         await inter.send(self.lang[locale]["setLogsChannel"])

@@ -22,9 +22,9 @@ class Localization:
     def __init__(self, locale: dict):
         self.locale = locale
 
-    def __getitem__(self, item: str) -> dict:
+    def __getitem__(self, item: disnake.Locale) -> dict:
         print(item)
-        if item in ("ru", ):
+        if item in (disnake.Locale.ru,):
             return self.locale[item]
         return self.locale["en_US"]
 
