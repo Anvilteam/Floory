@@ -23,7 +23,6 @@ class Localization:
         self.locale = locale
 
     def __getitem__(self, item: disnake.Locale) -> dict:
-        print(item)
         if item in (disnake.Locale.ru,):
             return self.locale[item.__str__()]
         return self.locale["en_US"]
