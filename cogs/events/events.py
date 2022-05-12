@@ -41,6 +41,14 @@ class Events(commands.Cog):
         logger.info(f"Бот покидает гильдию {guild.name}-{guild.id}")
 
     @commands.Cog.listener()
+    async def on_member_join(self, member: disnake.Member):
+        auto_role = await cur("fetch", f"SELECT `auto-role` FROM `guilds` WHERE `guild` = {member.guild.id}")
+        if auto_role is not None:
+            role = member.guild.get_role(auto_role)
+            if role is not None:
+                await member.add_roles(role)
+
+    @commands.Cog.listener()
     async def on_slash_command_error(self, inter: disnake.ApplicationCommandInteraction, error):
         locale = inter.locale
         formatted = f"{error}|{inter.application_command.name}"

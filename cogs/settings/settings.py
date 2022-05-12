@@ -45,6 +45,19 @@ class Settings(commands.Cog):
             locale = inter.locale
             await inter.send(self.lang[locale]["NotGuildOwner"])
 
+    @commands.dynamic_cooldown(DynamicCooldown(1, 30), commands.BucketType.member)
+    @settings.sub_command_group()
+    async def auto_role(self, inter: disnake.ApplicationCommandInteraction):
+        pass
+
+    @auto_role.sub_command(description="включить авто-роль")
+    async def set_role(self, inter: disnake.ApplicationCommandInteraction,
+                       role: disnake.Role = commands.Param(default=None,
+                                                           desc="роль для выдачи, оставьте пустым для выключения")):
+        role_id = role.id if role is not None else None
+        await cur("query", f"UPDATE `guilds` SET `auto-role` = {role_id} WHERE `guild` = {inter.guild_id}")
+        await inter.send(self.lang[inter.locale]["auto_role"])
+
     @commands.dynamic_cooldown(DynamicCooldown(1, 60), commands.BucketType.member)
     @settings.sub_command_group(description="включить/отключить новости бота")
     async def news(self, inter: disnake.ApplicationCommandInteraction):

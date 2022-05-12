@@ -14,4 +14,5 @@
  "setLogsChannel": "Logging channel successfully configured",
 
  "setLocale": "Language has been successfully changed ({})",
- "settings_logs": "{author} changed bot settings"}
+ "settings_logs": "{author} changed bot settings",
+ "auto_role":  "The auto-role has been successfully changed!"}
