@@ -54,7 +54,7 @@ class Settings(commands.Cog):
     async def set_role(self, inter: disnake.ApplicationCommandInteraction,
                        role: disnake.Role = commands.Param(default=None,
                                                            desc="роль для выдачи, оставьте пустым для выключения")):
-        role_id = role.id if role is not None else None
+        role_id = "NULL" if role is None or role.is_default() else role.id
         await cur("query", f"UPDATE `guilds` SET `auto-role` = {role_id} WHERE `guild` = {inter.guild_id}")
         await inter.send(self.lang[inter.locale]["auto_role"])
 

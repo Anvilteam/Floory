@@ -4,7 +4,6 @@ import os
 import yaml
 import sys
 from disnake.ext import commands, tasks
-from typing import List
 
 import core.database
 from core.guild_data import new_guild

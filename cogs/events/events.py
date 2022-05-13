@@ -46,6 +46,8 @@ class Events(commands.Cog):
         if auto_role is not None:
             role = member.guild.get_role(auto_role)
             if role is not None:
+                if role > member.guild.me.top_role or not member.guild.me.guild_permissions.manage_roles:
+                    return
                 await member.add_roles(role)
 
     @commands.Cog.listener()
