@@ -18,7 +18,6 @@ test_guilds = [737351356079145002,  # FallenSky
                555376972990119964  # Polygon
                ]
 
-
 # Настройки логирования
 logger.add(sys.stderr, format="{time} {level} {message}", filter="my_module", level="INFO",
            enqueue=True,
@@ -32,6 +31,8 @@ with open('config.yaml', 'r', encoding="UTF-8") as f:
 logger.info(f"Запуск disnake {disnake.__version__}..")
 
 client = commands.Bot(command_prefix=cfg["bot"]["prefix"], intents=disnake.Intents.all())
+
+
 #                      test_guilds=test_guilds,
 #                      sync_commands_debug=True,
 #                      sync_permissions=True)
@@ -69,6 +70,11 @@ async def change_status():
     """Каждые 5 минут меняет статус"""
     current_status = random.choice(cfg["bot"]["splashes"])
     await client.change_presence(activity=disnake.Game(name=current_status, type=disnake.ActivityType.watching))
+
+
+@tasks.loop(hours=1)
+async def active_db():
+    result = await cur("fetch" "SELECT logging FROM `guilds` WHERE `guild` = 555376972990119964")
 
 
 client.run(cfg["bot"]["token"])
