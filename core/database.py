@@ -5,6 +5,7 @@ import yaml
 import aioredis
 from loguru import logger
 from typing import Literal
+import functools
 
 with open('config.yaml', 'r', encoding="UTF-8") as f:
     cfg = yaml.safe_load(f)
@@ -22,26 +23,30 @@ async def connect():
                                         autocommit=True)
 
 
-async def reconnect(func):
-    async def wrapper():
-        try:
-            func()
-        except aiomysql.OperationalError:
-            global connection
-            await connection.close()
-            logger.info("Соединение с бд закрыто")
-            connection = await aiomysql.connect(host=cfg["mysql"]["host"],
-                                                user=cfg["mysql"]["user"],
-                                                password=cfg["mysql"]["password"],
-                                                db=cfg["mysql"]["database"],
-                                                autocommit=True)
-            logger.info("Соединение с бд открыто\nВыполняю операцию еще раз")
-            func()
+def reconnect():
+    def wrapper(func):
+        @functools.wraps(func)
+        async def wrapped():
+            try:
+                return func()
+            except aiomysql.OperationalError:
+                global connection
+                await connection.close()
+                logger.info("Соединение с бд закрыто")
+                connection = await aiomysql.connect(host=cfg["mysql"]["host"],
+                                                    user=cfg["mysql"]["user"],
+                                                    password=cfg["mysql"]["password"],
+                                                    db=cfg["mysql"]["database"],
+                                                    autocommit=True)
+                logger.info("Соединение с бд открыто\nВыполняю операцию еще раз")
+                return func()
+
+        return wrapped
 
     return wrapper
 
 
-@reconnect
+@reconnect()
 @logger.catch
 async def cur(_type: Literal["query", "fetch", "fetchall"], arg: str):
     result = None

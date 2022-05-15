@@ -6,9 +6,9 @@ from core.tools import is_bot_developer, COLORS
 from core.exceptions import *
 from loguru import logger
 
-
 with open('config.yaml', 'r', encoding="UTF-8") as f:
     cfg = yaml.safe_load(f)
+
 
 class Music(commands.Cog):
     def __init__(self, client):
