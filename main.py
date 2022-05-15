@@ -3,6 +3,7 @@ import random
 import os
 import yaml
 import sys
+import wavelink
 from disnake.ext import commands, tasks
 
 import core.database
@@ -44,6 +45,11 @@ async def on_ready():
         if filename != '__pycache__':
             client.load_extension(f'cogs.{filename}')
             logger.info(f"Ког {filename} загружен")
+    await wavelink.NodePool.create_node(bot=client,
+                                        host='172.18.0.1',
+                                        port=60002,
+                                        password=cfg["lavalink"]["password"])
+    logger.info("Успешная загрузка wavelink")
     logger.info("Начало загрузки кэша")
     await core.database.connect()
     await load_cache()
