@@ -23,7 +23,7 @@ async def connect():
 
 
 async def reconnect(func):
-    def wrapper():
+    async def wrapper():
         try:
             func()
         except aiomysql.OperationalError:
