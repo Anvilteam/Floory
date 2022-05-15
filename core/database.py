@@ -22,6 +22,26 @@ async def connect():
                                         autocommit=True)
 
 
+def reconnect(func):
+    def wrapper():
+        try:
+            func()
+        except aiomysql.OperationalError:
+            global connection
+            await connection.close()
+            logger.info("Соединение с бд закрыто")
+            connection = await aiomysql.connect(host=cfg["mysql"]["host"],
+                                                user=cfg["mysql"]["user"],
+                                                password=cfg["mysql"]["password"],
+                                                db=cfg["mysql"]["database"],
+                                                autocommit=True)
+            logger.info("Соединение с бд открыто\nВыполняю операцию еще раз")
+            func()
+
+    return wrapper
+
+
+@reconnect
 @logger.catch
 async def cur(_type: Literal["query", "fetch", "fetchall"], arg: str):
     result = None
