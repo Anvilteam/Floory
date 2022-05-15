@@ -26,5 +26,5 @@ class Music(commands.Cog):
             await inter.send("Вы не в голосовом канале")
             return
         player: wavelink.Player = inter.guild.voice_client or await vc.channel.connect(cls=wavelink.Player)
-        yt = await wavelink.YouTubeTrack.search(query="Ocean Drive", return_first=True)
+        yt = await wavelink.YouTubeTrack.search(query=query, return_first=True)
         await player.play(yt)
