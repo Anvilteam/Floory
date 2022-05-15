@@ -22,7 +22,7 @@ async def connect():
                                         autocommit=True)
 
 
-def reconnect(func):
+async def reconnect(func):
     def wrapper():
         try:
             func()
