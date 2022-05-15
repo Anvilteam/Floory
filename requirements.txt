@@ -5,3 +5,4 @@ gpytranslate==1.4.0
 aiomysql==0.0.22
 aioredis==2.0.1
 progress==1.6
+git+https://github.com/Xemay/Wavelink_disnake
