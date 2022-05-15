@@ -28,3 +28,14 @@ class Music(commands.Cog):
         player: wavelink.Player = inter.guild.voice_client or await vc.channel.connect(cls=wavelink.Player)
         yt = await wavelink.YouTubeTrack.search(query=query, return_first=True)
         await player.play(yt)
+
+    @music.sub_command()
+    async def queue_add(self, inter: disnake.ApplicationCommandInteraction,
+                        query: str = commands.Param(desc="запрос для поиска")):
+        vc: disnake.VoiceState = inter.author.voice
+        if vc is None or vc.channel is None:
+            await inter.send("Вы не в голосовом канале")
+            return
+        player: wavelink.Player = inter.guild.voice_client or await vc.channel.connect(cls=wavelink.Player)
+        yt = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+        player.queue.put(yt)
