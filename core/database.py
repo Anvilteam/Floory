@@ -1,6 +1,7 @@
 import asyncio
 import aiomysql
 import loguru
+import pymysql.err
 import yaml
 import aioredis
 from loguru import logger
@@ -11,7 +12,7 @@ with open('config.yaml', 'r', encoding="UTF-8") as f:
     cfg = yaml.safe_load(f)
 loop = asyncio.get_event_loop()
 
-redis_client = aioredis.from_url(url="redis://127.0.0.1", port=6379, db=0, decode_responses=True)
+redis_client = aioredis.from_url(url=cfg["redis"]["host"], port=cfg["redis"]["port"], db=0, decode_responses=True)
 
 
 async def connect():
@@ -26,10 +27,10 @@ async def connect():
 def reconnect():
     def wrapper(func):
         @functools.wraps(func)
-        async def wrapped():
+        async def wrapped(*args, **kwargs):
             try:
-                return func()
-            except aiomysql.OperationalError:
+                return await func(*args, **kwargs)
+            except pymysql.err.OperationalError:
                 global connection
                 await connection.close()
                 logger.info("Соединение с бд закрыто")
@@ -39,7 +40,7 @@ def reconnect():
                                                     db=cfg["mysql"]["database"],
                                                     autocommit=True)
                 logger.info("Соединение с бд открыто\nВыполняю операцию еще раз")
-                return func()
+                return await func(*args, **kwargs)
 
         return wrapped
 
