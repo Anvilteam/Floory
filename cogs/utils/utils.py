@@ -165,7 +165,7 @@ class Utils(commands.Cog):
             else:
                 if i % 2 == 0:
                     formatted += "\n"
-                    i += 1
+                i += 1
         if len(strings) == 0:
             await inter.send(formatted)
             return
