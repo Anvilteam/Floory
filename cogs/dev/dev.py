@@ -17,11 +17,6 @@ class Dev(commands.Cog):
     async def dev(self, inter):
         pass
 
-    @dev.error
-    async def dev_error(self, inter, error):
-        if isinstance(error, NotDeveloper):
-            await inter.send("You are not bot developer")
-
     @dev.sub_command(description="получить кэш гильдии")
     async def get_cache(self, inter: disnake.ApplicationCommandInteraction):
         cache = await GuildData.from_cache(inter.guild_id)

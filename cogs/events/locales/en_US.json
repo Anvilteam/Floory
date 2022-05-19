@@ -17,6 +17,7 @@
  "NotGuildOwner": "You're not an owner of this server",
  "CommandOnCooldown": "You need to wait till using this command again: {time}",
  "Forbidden": "Bot don't have enough permissions for this!",
+ "NotDeveloper": "You are not a bot developer!",
  "requiredPerms": "Required permissions",
  "closeVoting": "Close vote",
  "votingEnd": "Vote has ended",

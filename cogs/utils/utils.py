@@ -137,9 +137,10 @@ class Utils(commands.Cog):
         t = Translator()
         message = inter.target
         lang = await t.detect(message.content)
-        phrase = await t.translate(text=message.content, targetlang=locale.value)
-        await inter.send(f"{message.content} :flag_{lang.replace('en_US', 'gb').replace('en_UK', 'gb')}: -> {phrase.text}"
-                         f" :flag_{locale.value.replace('en_US', 'gb').replace('en_UK', 'gb')}:")
+        phrase = await t.translate(text=message.content, targetlang=str(locale))
+        await inter.send(
+            f"{message.content} :flag_{lang.replace('en_US', 'gb').replace('en_UK', 'gb')}: -> {phrase.text}"
+            f" :flag_{str(locale).replace('en_US', 'gb').replace('en_UK', 'gb')}:")
 
     @commands.message_command(name="Перевести на английский")
     async def to_english(self, inter: disnake.ApplicationCommandInteraction):
@@ -153,10 +154,21 @@ class Utils(commands.Cog):
     @utils.sub_command(description="получить id всех эмодзи данного сервера")
     async def get_emojis(self, inter: disnake.ApplicationCommandInteraction):
         emojis = inter.guild.emojis
+        strings = []
         formatted = ''
+        i = 1
         for e in emojis:
-            if e.animated:
-                formatted += f"<a:{e.name}:{e.id}> `{e.id}`\n"
+            formatted += f"<a:{e.name}:{e.id}> `{e.id}`" if e.animated else f"<:{e.name}:{e.id}> `{e.id}`"
+            if len(formatted) > 1700:
+                strings.append(formatted)
+                formatted = ''
             else:
-                formatted += f"<:{e.name}:{e.id}> `{e.id}`\n"
-        await inter.send(formatted)
+                if i % 2 == 0:
+                    formatted += "\n"
+                    i += 1
+        if len(strings) == 0:
+            await inter.send(formatted)
+            return
+        await inter.send(strings.pop(0))
+        for s in strings:
+            await inter.channel.send(s)

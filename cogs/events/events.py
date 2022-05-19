@@ -6,7 +6,7 @@ from loguru import logger
 from core.tools import translated, COLORS, DEVELOPERS
 from core.guild_data import new_guild
 from core.database import cur, redis_client
-from core.exceptions import MemberHigherPermissions
+from core.exceptions import MemberHigherPermissions, NotDeveloper
 
 __file__ = "cogs/events/locales"
 
@@ -83,6 +83,9 @@ class Events(commands.Cog):
                 string = f"❌ {self.lang[locale][perm]}\n"
                 embed_value += string
             embed.add_field(name=f"> {self.lang[locale]['requiredPerms']}", value=embed_value)
+        elif isinstance(error, NotDeveloper):
+            embed.add_field(name=f"```NotDeveloper```",
+                            value=self.lang[locale]["NotDeveloper"])
         else:
             embed.description = formatted
             logger.error("-----------------Неизвестная ошибка!----------------")
