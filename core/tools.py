@@ -100,7 +100,7 @@ def translated(*paths):
             folder = Path(p).resolve()
 
             for l in folder.iterdir():
-                logger.info(f"Загрузка {l} для {cls.__cog_name__}")
+                logger.info(f"Загрузка {l} для {cls.__qualname__ }")
                 with open(l, "r", encoding='UTF-8') as f:
                     multi_lang[l.name[:-5]] = json.load(f)
 
