@@ -14,4 +14,5 @@
  "sCreated_at": "Сервер создан:",
  "members_permissions": "Права участника {member}",
  "perms_list": "Список прав",
- "closeVoting": "Закрыть голосование"}
+ "closeVoting": "Закрыть голосование",
+ "noEmojis": "У вас нет кастомных эмодзи :D"}

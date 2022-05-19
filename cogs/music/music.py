@@ -5,6 +5,7 @@ from disnake.ext import commands
 from core.tools import is_bot_developer, COLORS
 from core.exceptions import *
 from loguru import logger
+from core.music import MusicView
 
 with open('config.yaml', 'r', encoding="UTF-8") as f:
     cfg = yaml.safe_load(f)
@@ -27,8 +28,11 @@ class Music(commands.Cog):
             return
         player: wavelink.Player = inter.guild.voice_client or await vc.channel.connect(cls=wavelink.Player)
         yt = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-        print(dir(yt))
+        embed = disnake.Embed(title=yt.title,
+                              description=f"Author - {yt.author}")
+        embed.set_thumbnail(yt.thumbnail)
         await player.play(yt)
+        await inter.send(view=MusicView())
 
     @music.sub_command()
     async def queue_add(self, inter: disnake.ApplicationCommandInteraction,

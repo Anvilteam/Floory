@@ -14,4 +14,5 @@
  "sCreated_at": "Server has been created at:",
  "members_permissions": "{member}'s permissions",
  "perms_list": "Permission list",
- "closeVoting": "Close voting"}
+ "closeVoting": "Close voting",
+ "noEmojis": "You don't have custom emojis :D"}

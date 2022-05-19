@@ -154,6 +154,9 @@ class Utils(commands.Cog):
     @utils.sub_command(description="получить id всех эмодзи данного сервера")
     async def get_emojis(self, inter: disnake.ApplicationCommandInteraction):
         emojis = inter.guild.emojis
+        locale = inter.locale
+        if len(emojis) == 0:
+            await inter.send(self.lang[locale]["noEmojis"])
         strings = []
         formatted = ''
         i = 1

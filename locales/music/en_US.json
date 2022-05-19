@@ -1,0 +1,7 @@
+{"error": "An error has occurred!",
+ "reason":"Perhaps the cause is one of the following",
+  "notInChannel":"Bot/You are not in a voice channel (you must first run the /music play command)",
+  "otherChannel": "The bot is already in another voice channel",
+ "alreadyPaused": "The music has already stopped!",
+ "alreadyResumed": "The music is already playing!"
+}
