@@ -38,7 +38,7 @@ class Utils(commands.Cog):
                 embed.set_image(image.url)
             view = disnake.ui.View()
             for v in variants_:
-                custom_id = (random.choice(string.ascii_lowercase + string.digits) for _ in range(4))
+                custom_id = (random.choice(string.ascii_lowercase + string.digits) for _ in range(6))
                 embed.add_field(name=v, value="-------------------")
                 view.add_item(disnake.ui.Button(label=v + "|0",
                                                 custom_id=f"vote-{custom_id}"))
