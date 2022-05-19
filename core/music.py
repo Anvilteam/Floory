@@ -35,7 +35,7 @@ class MusicView(disnake.ui.View):
     @disnake.ui.button(emoji="▶")
     async def resume(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         player: wavelink.Player = inter.guild.voice_client
-        if player.is_paused():
+        if not player.is_playing():
             await player.resume()
             return
         lang = inter.locale

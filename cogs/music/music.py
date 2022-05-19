@@ -32,7 +32,7 @@ class Music(commands.Cog):
                               description=f"Author - {yt.author}")
         embed.set_thumbnail(yt.thumbnail)
         await player.play(yt)
-        await inter.send(view=MusicView())
+        await inter.send(view=MusicView(), embed=embed)
 
     @music.sub_command()
     async def queue_add(self, inter: disnake.ApplicationCommandInteraction,
