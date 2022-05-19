@@ -27,6 +27,7 @@ class Music(commands.Cog):
             return
         player: wavelink.Player = inter.guild.voice_client or await vc.channel.connect(cls=wavelink.Player)
         yt = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+        print(dir(yt))
         await player.play(yt)
 
     @music.sub_command()

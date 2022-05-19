@@ -22,3 +22,11 @@ mysql:
   port: 3306
   password: "password"
   database: "dbName"
+
+
+redis:
+  host: "redis://127.0.0.1"
+  port: 6379
+
+lavalink:
+  password: "password"
