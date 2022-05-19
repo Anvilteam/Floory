@@ -37,11 +37,14 @@ class Utils(commands.Cog):
             if image is not None:
                 embed.set_image(image.url)
             view = disnake.ui.View()
+            ascii_digits = string.ascii_lowercase + string.digits
+            custom_ids = [random.choice(ascii_digits) for _ in range(6)]
+            i = 0
             for v in variants_:
-                custom_id = (random.choice(string.ascii_lowercase + string.digits) for _ in range(6))
                 embed.add_field(name=v, value="-------------------")
                 view.add_item(disnake.ui.Button(label=v + "|0",
-                                                custom_id=f"vote-{custom_id}"))
+                                                custom_id=f"vote-{custom_ids[i]}"))
+                i+=1
             view.add_item(disnake.ui.Button(label=self.lang[locale]["closeVoting"], emoji="❌", custom_id="close_vote-"))
             await inter.send(embed=embed, view=view)
         else:
