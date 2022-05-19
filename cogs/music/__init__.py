@@ -1,5 +1,5 @@
-from cogs.music.music import MusicView
+from cogs.music.music import Music
 
 
 def setup(client):
-    client.add_cog(MusicView(client))
+    client.add_cog(Music(client))
