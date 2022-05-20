@@ -35,7 +35,7 @@ class Music(commands.Cog):
         if len(query) > 40:
             await inter.send("Запрос слишком больше(можно не более 40 символов)")
             return
-        if inter.guild.voice_client is not None and inter.guild.voice_client != vc.channel:
+        if inter.guild.voice_client is not None and inter.guild.voice_client.channel != vc.channel:
             await inter.send("Бот уже в другом голосовом канале")
             return
         player: wavelink.Player = await vc.channel.connect(cls=wavelink.Player)
