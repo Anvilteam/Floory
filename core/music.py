@@ -26,8 +26,9 @@ class MusicView(disnake.ui.View):
     @disnake.ui.button(emoji="⏸")
     async def pause(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         player: wavelink.Player = inter.guild.voice_client
+        print(type(player))
         if player.is_playing():
-            await player.stop()
+            await player.pause()
             return
         lang = inter.locale
         await inter.send(self.lang[lang]["alreadyPaused"])
@@ -35,6 +36,7 @@ class MusicView(disnake.ui.View):
     @disnake.ui.button(emoji="▶")
     async def resume(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         player: wavelink.Player = inter.guild.voice_client
+        print(dir(player))
         if player.is_paused():
             await player.resume()
             return
@@ -44,5 +46,9 @@ class MusicView(disnake.ui.View):
     @disnake.ui.button(emoji="⏩")
     async def skip(self, button: disnake.ui.Button, inter: disnake.MessageInteraction):
         player: wavelink.Player = inter.guild.voice_client
-        player.queue.pop()
-        await player.play(player.queue.pop())
+        if player.queue.count > 0:
+            track = player.queue.pop()
+            await player.play(track)
+            await inter.send(f"Переключаю на {track.title}")
+            return
+        await inter.send("Очереь пуста")

@@ -15,6 +15,12 @@ class Music(commands.Cog):
     def __init__(self, client):
         self.client = client
 
+    @commands.Cog.listener()
+    async def on_wavelink_track_end(self, player: wavelink.Player, track: wavelink.Track, reason):
+        if player.queue.count > 0 and reason != "REPLACED":
+            track_ = player.queue.pop()
+            await player.play(track_)
+
     @commands.slash_command()
     async def music(self, inter):
         pass
@@ -26,8 +32,18 @@ class Music(commands.Cog):
         if vc is None or vc.channel is None:
             await inter.send("Вы не в голосовом канале")
             return
-        player: wavelink.Player = inter.guild.voice_client or await vc.channel.connect(cls=wavelink.Player)
-        yt = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+        if len(query) > 40:
+            await inter.send("Запрос слишком больше(можно не более 40 символов)")
+            return
+        if inter.guild.voice_client is not None and inter.guild.voice_client != vc.channel:
+            await inter.send("Бот уже в другом голосовом канале")
+            return
+        player: wavelink.Player = await vc.channel.connect(cls=wavelink.Player)
+        yt = await wavelink.YouTubeTrack.search(query=query)
+        if len(yt) == 0:
+            await inter.send("По вашему запросу ничего не найдено")
+            return
+        yt = yt[0]
         embed = disnake.Embed(title=yt.title,
                               description=f"Author - {yt.author}")
         embed.set_thumbnail(yt.thumbnail)
@@ -41,6 +57,8 @@ class Music(commands.Cog):
         if vc is None or vc.channel is None:
             await inter.send("Вы не в голосовом канале")
             return
-        player: wavelink.Player = inter.guild.voice_client or await vc.channel.connect(cls=wavelink.Player)
+        player: wavelink.Player = inter.guild.voice_client
         yt = await wavelink.YouTubeTrack.search(query=query, return_first=True)
-        player.queue.put(yt)
+        inter.guild.voice_client.queue.put(yt)
+
+        await inter.send(player.queue[-1].title)
