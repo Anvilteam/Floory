@@ -39,19 +39,17 @@ class Music(commands.Cog):
             await inter.send("Бот уже в другом голосовом канале", ephemeral=True)
             return
         player: wavelink.Player = await vc.channel.connect(cls=wavelink.Player)
-        yt = await wavelink.YouTubeTrack.search(query=query)
-        if len(yt) == 0:
+        yt = await wavelink.YouTubeTrack.search(query=query, return_first=True)
+        if len(yt.title) == 0:
             await inter.send("По вашему запросу ничего не найдено", ephemeral=True)
             return
-        yt = yt[0]
         if player.queue.count > 0:
             inter.guild.voice_client.queue.put(yt)
             await inter.send(view=MusicView(), embed=disnake.Embed(
                 title=f"Трек добавлен в очередь", description=f"Название - {yt.title}\nАвтор - {yt.author}"
             ))
-            return
-        embed = disnake.Embed(title=yt.title,
-                              description=f"Author - {yt.author}")
+            pass
+        embed = disnake.Embed(title=yt.title, description=f"Author - {yt.author}")
         embed.set_thumbnail(yt.thumbnail)
         await player.play(yt)
         await inter.send(view=MusicView(), embed=embed)
