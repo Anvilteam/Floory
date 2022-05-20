@@ -30,25 +30,46 @@ class Music(commands.Cog):
                    query: str = commands.Param(desc="запрос для поиска")):
         vc: disnake.VoiceState = inter.author.voice
         if vc is None or vc.channel is None:
-            await inter.send("Вы не в голосовом канале")
+            await inter.send("Вы не в голосовом канале", ephemeral=True)
             return
-        if len(query) > 40:
-            await inter.send("Запрос слишком больше(можно не более 40 символов)")
+        if len(query) >= 40:
+            await inter.send("Запрос не может быть длиннее 40 символов", ephemeral=True)
             return
         if inter.guild.voice_client is not None and inter.guild.voice_client.channel != vc.channel:
-            await inter.send("Бот уже в другом голосовом канале")
+            await inter.send("Бот уже в другом голосовом канале", ephemeral=True)
             return
         player: wavelink.Player = await vc.channel.connect(cls=wavelink.Player)
         yt = await wavelink.YouTubeTrack.search(query=query)
         if len(yt) == 0:
-            await inter.send("По вашему запросу ничего не найдено")
+            await inter.send("По вашему запросу ничего не найдено", ephemeral=True)
             return
         yt = yt[0]
+        if player.queue.count > 0:
+            inter.guild.voice_client.queue.put(yt)
+            await inter.send(view=MusicView(), embed=disnake.Embed(
+                title=f"Трек добавлен в очередь", description=f"Название - {yt.title}\nАвтор - {yt.author}"
+            ))
+            return
         embed = disnake.Embed(title=yt.title,
                               description=f"Author - {yt.author}")
         embed.set_thumbnail(yt.thumbnail)
         await player.play(yt)
         await inter.send(view=MusicView(), embed=embed)
+
+    @music.sub_command()
+    async def queue_list(self, inter: disnake.ApplicationCommandInteraction):
+        vc: disnake.VoiceState = inter.author.voice
+        if vc is None or vc.channel is None:
+            await inter.send("Вы не в голосовом канале", ephemeral=True)
+            return
+        player: wavelink.Player = inter.guild.voice_client
+        if player.queue.count == 0:
+            await inter.send("Очередь пуста", ephemeral=True)
+            return
+        embed = disnake.Embed(title="Список очереди", description="")
+        for i in player.queue:
+            embed.description = embed.description + f"\n{i.title}"
+        await inter.send(embed=embed)
 
     @music.sub_command()
     async def queue_add(self, inter: disnake.ApplicationCommandInteraction,
