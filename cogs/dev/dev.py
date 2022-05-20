@@ -13,7 +13,7 @@ class Dev(commands.Cog):
         self.client = client
 
     @is_bot_developer()
-    @commands.slash_command(auto_sync=False)
+    @commands.slash_command()
     async def dev(self, inter):
         pass
 

@@ -16,7 +16,7 @@ class Settings(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.slash_command(default_member_permissions=disnake.Permissions(administrator=True), auto_sync=False)
+    @commands.slash_command(default_member_permissions=disnake.Permissions(administrator=True))
     async def settings(self, inter):
         pass
 

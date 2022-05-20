@@ -16,7 +16,7 @@ class Moderation(commands.Cog):
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 90), commands.BucketType.member)
     @is_higher()
-    @commands.slash_command(auto_sync=True)
+    @commands.slash_command()
     async def moderation(self, inter: disnake.ApplicationCommandInteraction):
         pass
 
@@ -102,8 +102,7 @@ class Moderation(commands.Cog):
     @commands.dynamic_cooldown(DynamicCooldown(1, 90), commands.BucketType.member)
     @commands.bot_has_permissions(manage_messages=True)
     @commands.slash_command(description="очистка чата на указанное кол-во сообщений",
-                            default_member_permissions=disnake.Permissions(manage_messages=True),
-                            auto_sync=False)
+                            default_member_permissions=disnake.Permissions(manage_messages=True))
     async def clear(self, inter: disnake.ApplicationCommandInteraction,
                     amount: int = commands.Param(default=1, description='кол-во сообщений (макс. 250)', gt=1, lt=251),
                     member: disnake.Member = commands.Param(default=None,
