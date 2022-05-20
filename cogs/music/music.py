@@ -32,7 +32,7 @@ class Music(commands.Cog):
         if vc is None or vc.channel is None:
             await inter.send("Вы не в голосовом канале", ephemeral=True)
             return
-        if len(query) >= 40:
+        if len(query) > 40:
             await inter.send("Запрос не может быть длиннее 40 символов", ephemeral=True)
             return
         if inter.guild.voice_client is not None and inter.guild.voice_client.channel != vc.channel:
@@ -48,11 +48,21 @@ class Music(commands.Cog):
             await inter.send(view=MusicView(), embed=disnake.Embed(
                 title=f"Трек добавлен в очередь", description=f"Название - {yt.title}\nАвтор - {yt.author}"
             ))
-            pass
+            return
         embed = disnake.Embed(title=yt.title, description=f"Author - {yt.author}")
         embed.set_thumbnail(yt.thumbnail)
         await player.play(yt)
         await inter.send(view=MusicView(), embed=embed)
+
+    @commands.has_permissions(move_members=True)
+    @music.sub_command()
+    async def disconnect(self, inter: disnake.ApplicationCommandInteraction):
+        vc: wavelink.Player | None = inter.guild.voice_client
+        if vc is not None:
+            await vc.disconnect()
+            await inter.send(f"{inter.author} отключил бота от голосового канала")
+            return
+        await inter.send("Бот не находится в голосовом канале")
 
     @music.sub_command()
     async def queue_list(self, inter: disnake.ApplicationCommandInteraction):
