@@ -20,7 +20,7 @@ class Main(commands.Cog):
         self.client = client
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 30), commands.BucketType.member)
-    @commands.slash_command(description="состояние бота")
+    @commands.slash_command(description="состояние бота", auto_sync=False)
     async def status(self,
                      inter: disnake.ApplicationCommandInteraction):
         splash = random.choice(cfg["bot"]["status_splashes"])
@@ -45,7 +45,7 @@ class Main(commands.Cog):
         await inter.send(embed=embed, view=v)
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 600), commands.BucketType.member)
-    @commands.slash_command(description="предложить идею для бота")
+    @commands.slash_command(description="предложить идею для бота", auto_sync=False)
     async def idea(self,
                    inter: disnake.ApplicationCommandInteraction,
                    title: str = commands.Param(description="Название идеи"),
@@ -62,7 +62,7 @@ class Main(commands.Cog):
         await inter.send("Ваша идея была успешно предложена")
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 600), commands.BucketType.member)
-    @commands.slash_command(description="сообщить о баге/ошибке в боте")
+    @commands.slash_command(description="сообщить о баге/ошибке в боте", auto_sync=False)
     async def bug(self,
                   inter: disnake.ApplicationCommandInteraction,
                   bug_name: str = commands.Param(description="Название бага"),
@@ -78,7 +78,7 @@ class Main(commands.Cog):
         await inter.send("Баг был успешно отправлен", ephemeral=True)
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 20), commands.BucketType.member)
-    @commands.slash_command(description="список команд бота")
+    @commands.slash_command(description="список команд бота", auto_sync=False)
     async def help(self,
                    inter: disnake.ApplicationCommandInteraction):
         embed = disnake.Embed(title="📗 Help",
@@ -105,7 +105,7 @@ class Main(commands.Cog):
         await inter.send(embed=embed)
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 45), commands.BucketType.member)
-    @commands.slash_command(description="пинг бота")
+    @commands.slash_command(description="пинг бота", auto_sync=False)
     async def ping(self,
                    inter: disnake.ApplicationCommandInteraction):
         latency = self.client.latency

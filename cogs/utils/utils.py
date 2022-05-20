@@ -18,7 +18,7 @@ class Utils(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.slash_command()
+    @commands.slash_command(auto_sync=False)
     async def utils(self, inter):
         pass
 

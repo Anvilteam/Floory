@@ -16,7 +16,7 @@ class Moderation(commands.Cog):
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 90), commands.BucketType.member)
     @is_higher()
-    @commands.slash_command()
+    @commands.slash_command(auto_sync=True)
     async def moderation(self, inter: disnake.ApplicationCommandInteraction):
         pass
 

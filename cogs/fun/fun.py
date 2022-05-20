@@ -26,7 +26,7 @@ class Fun(commands.Cog):
         self.client = client
 
     @commands.dynamic_cooldown(DynamicCooldown(1, 10), commands.BucketType.member)
-    @commands.slash_command()
+    @commands.slash_command(auto_sync=False)
     async def fun(self, inter):
         pass
 
