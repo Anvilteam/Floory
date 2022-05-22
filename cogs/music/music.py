@@ -57,7 +57,7 @@ class Music(commands.Cog):
         yt = yt[0]
         embed = disnake.Embed(title=yt.title, description=f"{self.lang[locale]['author']} - {yt.author}")
         embed.set_thumbnail(yt.thumbnail)
-        if player.queue.count > 0 or player.is_connected() and player.track is None:
+        if player.queue.count > 0 or player.is_connected():
             if player.is_connected() and player.track is None:
                 await player.play(yt)
                 await inter.send(view=MusicView(), embed=embed)
