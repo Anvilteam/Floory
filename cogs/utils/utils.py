@@ -4,7 +4,7 @@ import random
 from disnake.ext import commands
 from disnake.ext.commands import Param
 
-from core.tools import perms_to_dict, translated, dev_cooldown
+from core.tools import perms_to_dict, translated
 from core.cooldown import DynamicCooldown
 
 from gpytranslate import Translator

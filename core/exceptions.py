@@ -26,3 +26,22 @@ class NotDeveloper(commands.CheckFailure):
 class InBlacklist(commands.CommandError):
     def __init__(self):
         super().__init__('InBlacklist: Member is blocked by bot DEVELOPERS')
+
+
+class MusicException(commands.CheckFailure):
+    ...
+
+
+class NotInVoice(MusicException):
+    def __init__(self):
+        super().__init__('Member is not in voice channel')
+
+
+class OtherVoice(MusicException):
+    def __init__(self):
+        super().__init__('Bot in other voice channel')
+
+
+class EmptyQueue(MusicException):
+    def __init__(self):
+        super().__init__('Queue is empty!')

@@ -1,7 +1,16 @@
 {"error": "An error has occurred!",
+  "author": "Author",
+ "title": "Title",
  "reason":"Perhaps the cause is one of the following",
   "notInChannel":"Bot/You are not in a voice channel (you must first run the /music play command)",
   "otherChannel": "The bot is already in another voice channel",
  "alreadyPaused": "The music has already stopped!",
- "alreadyResumed": "The music is already playing!"
+ "alreadyResumed": "The music is already playing!",
+ "emptyQueue": "The queue is empty!",
+ "veryLongQuery": "Query cannot be longer than 40 characters",
+ "noResults": "Nothing found for your request",
+ "addedInQueue": "The track has been added to the queue.",
+ "disconnected": "{member} disconnected the bot from the voice channel",
+ "queuePop": "{title} has been removed from the queue",
+ "queueList": "Queue List"
 }

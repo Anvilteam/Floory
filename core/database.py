@@ -5,7 +5,7 @@ import pymysql.err
 import yaml
 import aioredis
 from loguru import logger
-from typing import Literal
+from typing import Literal, Any
 import functools
 
 with open('config.yaml', 'r', encoding="UTF-8") as f:
@@ -15,7 +15,7 @@ loop = asyncio.get_event_loop()
 redis_client = aioredis.from_url(url=cfg["redis"]["host"], port=cfg["redis"]["port"], db=0, decode_responses=True)
 
 
-async def connect():
+async def connect() -> None:
     global connection
     connection = await aiomysql.connect(host=cfg["mysql"]["host"],
                                         user=cfg["mysql"]["user"],
@@ -49,7 +49,7 @@ def reconnect():
 
 @reconnect()
 @logger.catch
-async def cur(_type: Literal["query", "fetch", "fetchall"], arg: str):
+async def cur(_type: Literal["query", "fetch", "fetchall"], arg: str) -> Any[int, str, bool] | tuple[Any]:
     result = None
     async with connection.cursor() as cur_:
         match _type:
@@ -63,5 +63,4 @@ async def cur(_type: Literal["query", "fetch", "fetchall"], arg: str):
                 result = await cur_.fetchall()
     if result is not None and len(result) == 1:
         result = result[0]
-    if result is not None:
-        return result
+    return result

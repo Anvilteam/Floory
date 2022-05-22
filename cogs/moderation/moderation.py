@@ -1,7 +1,8 @@
 import disnake
 import datetime
 from disnake.ext import commands
-from core.tools import is_higher, translated, COLORS
+from core.checks import is_higher
+from core.tools import translated, COLORS
 from core.cooldown import DynamicCooldown
 from core.guild_data import GuildData
 from core.exceptions import *

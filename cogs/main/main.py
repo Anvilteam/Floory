@@ -33,12 +33,12 @@ class Main(commands.Cog):
                               description=f"```{latency * 1000:.0f} ms | {splash}```",
                               color=COLORS['default'])
         embed.add_field(name="🛡 " + self.lang[locale]["guilds"], value=f"```{guilds}```")
-        embed.add_field(name="⚙ " + self.lang[locale]["cmds"], value=f"```{cmds}```", inline=False)
-        embed.add_field(name="👥 " + self.lang[locale]["users"], value=f"```{users}```")
-        embed.add_field(name="💻 " + self.lang[locale]["owners"], value=f"```Xemay#9586\nRedWolf#5064\nD3st0nλ#5637```",
+        embed.add_field(name="⚙ " + self.lang[locale]["cmds"], value=f"```{cmds}```")
+        embed.add_field(name="👥 " + self.lang[locale]["users"], value=f"```{users}```", inline=False)
+        embed.add_field(name="💻 " + self.lang[locale]["owners"], value=f"```Xemay#9586\nRedWolf#5064\nD3st0nλ#5637```")
+        embed.add_field(name="<:github:945683293666439198> Github", value="[Тык](https://github.com/Anvilteam/Floory)",
                         inline=False)
-        embed.add_field(name="<:github:945683293666439198> Github", value="[Тык](https://github.com/Anvilteam/Floory)")
-        embed.add_field(name="🎲 Version", value="```0.4.1 beta```", inline=False)
+        embed.add_field(name="🎲 Version", value="```0.4.2 | Music Update!```")
         embed.set_thumbnail(file=disnake.File("logo.png"))
         v = disnake.ui.View()
         v.add_item(disnake.ui.Button(label="Сервер поддержки", url="https://discord.gg/3KG3ue66rY"))

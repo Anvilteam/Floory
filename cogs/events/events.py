@@ -6,7 +6,7 @@ from loguru import logger
 from core.tools import translated, COLORS, DEVELOPERS
 from core.guild_data import new_guild
 from core.database import cur, redis_client
-from core.exceptions import MemberHigherPermissions, NotDeveloper
+from core.exceptions import MemberHigherPermissions, NotDeveloper, MusicException
 
 __file__ = "cogs/events/locales"
 
@@ -86,6 +86,8 @@ class Events(commands.Cog):
         elif isinstance(error, NotDeveloper):
             embed.add_field(name=f"```NotDeveloper```",
                             value=self.lang[locale]["NotDeveloper"])
+        elif isinstance(error, MusicException):
+            return
         else:
             embed.description = formatted
             logger.error("-----------------Неизвестная ошибка!----------------")

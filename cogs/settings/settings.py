@@ -1,10 +1,10 @@
 import disnake
 from disnake.ext import commands
 from disnake.ext.commands import Param
-import core.tools
-from core.tools import translated
+
+from core.tools import translated, news_status
 from core.cooldown import DynamicCooldown
-from core.database import cur, redis_client
+from core.database import cur
 from core.exceptions import *
 from core.guild_data import refresh, GuildData
 
@@ -68,10 +68,10 @@ class Settings(commands.Cog):
                       channel: disnake.TextChannel = commands.Param(description="канал куда будут поступать новости")):
         locale = inter.locale
         webhooks = await inter.guild.webhooks()
-        is_created, news = core.tools.news_status(webhooks)
+        is_created, news = news_status(webhooks)
         if not is_created:
             source = self.client.get_channel(917015010801238037)
-            news: disnake.Webhook = await source.follow(destination=channel)
+            news = await source.follow(destination=channel)
             await news.edit(name="FlooryNews")
             await inter.send(self.lang[locale]["newsOn"])
             return
@@ -81,7 +81,7 @@ class Settings(commands.Cog):
     async def news_off(self, inter: disnake.ApplicationCommandInteraction):
         locale = inter.locale
         webhooks = await inter.guild.webhooks()
-        is_created, news = core.tools.news_status(webhooks)
+        is_created, news = news_status(webhooks)
         if is_created:
             await news.delete()
             await inter.send(self.lang[locale]["newsOff"])
@@ -93,7 +93,7 @@ class Settings(commands.Cog):
                                channel: disnake.TextChannel = Param(description="канал куда будут поступать новости")):
         locale = inter.locale
         webhooks = await inter.guild.webhooks()
-        is_created, news = core.tools.news_status(webhooks)
+        is_created, news = news_status(webhooks)
         if not is_created:
             await inter.send(self.lang[locale]["newsNotCreatedYet"])
         else:
