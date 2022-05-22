@@ -5,7 +5,7 @@ import pymysql.err
 import yaml
 import aioredis
 from loguru import logger
-from typing import Literal, Any
+from typing import Literal, Union, Any
 import functools
 
 with open('config.yaml', 'r', encoding="UTF-8") as f:
@@ -49,7 +49,7 @@ def reconnect():
 
 @reconnect()
 @logger.catch
-async def cur(_type: Literal["query", "fetch", "fetchall"], arg: str) -> Any[int, str, bool] | tuple[Any]:
+async def cur(_type: Literal["query", "fetch", "fetchall"], arg: str) -> Union[int, str, bool] | tuple[Any]:
     result = None
     async with connection.cursor() as cur_:
         match _type:
