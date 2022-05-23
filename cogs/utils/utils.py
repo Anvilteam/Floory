@@ -157,6 +157,7 @@ class Utils(commands.Cog):
         locale = inter.locale
         if len(emojis) == 0:
             await inter.send(self.lang[locale]["noEmojis"])
+            return
         strings = []
         formatted = ''
         i = 1
