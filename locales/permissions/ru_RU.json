@@ -1,4 +1,5 @@
-{"create_instant_invite": "Создание приглашения",
+{
+  "create_instant_invite": "Создание приглашения",
   "kick_members": "Выгонять участников",
   "ban_members": "Банить участников",
   "administrator": "Администратор",
@@ -33,10 +34,11 @@
   "request_to_speak": "Попросить выступить",
   "manage_events": "Управление событиями",
   "manage_threads": "Управление ветками",
-  "create_public_threads": "Создать публичные веткие",
+  "create_public_threads": "Создать публичные ветки",
   "create_private_threads": "Создание приватных веток",
   "external_stickers": "Использовать внешние стикеры",
   "send_messages_in_threads": "Отправлять сообщения в ветках",
   "start_embedded_activities": "Начать активности",
   "moderate_members": "Отправлять участников подумать о своём поведении",
- "view_channel": "Просматривать канал"}
+  "view_channel": "Просматривать канал"
+}
