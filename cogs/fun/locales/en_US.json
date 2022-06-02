@@ -1,11 +1,11 @@
-{"toss": "Tossing a coin...",
-"eagleWin": "Heads won!",
-"tailWin": "Tails won!",
-
- "tossingCubes": "Rolling a dice...",
- "tmCubes": "Too many dices (Maximum 5)",
-
- "mystic_ball": "Mystical ball",
- "maybe": "Maybe",
- "asks": "Asks: ",
- "answer": "An answer of a magical sphere: "}
+{
+    "toss": "Tossing a coin...",
+    "eagleWin": "Heads won!",
+    "tailWin": "Tails won!",
+    "tossingCubes": "Rolling a dice...",
+    "tmCubes": "Too many dices (Maximum 5)",
+    "mystic_ball": "Mystical ball",
+    "maybe": "Maybe",
+    "asks": "Asks: ",
+    "answer": "An answer of a magical sphere: "
+}
